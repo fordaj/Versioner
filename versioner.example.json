@@ -1,0 +1,7 @@
+{
+  "defaultBranchVersion": 254,
+  "exemptBranches": {
+    "main": 1
+  },
+  "tagPattern": "v[0-9]*"
+}
