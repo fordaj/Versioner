@@ -122,7 +122,17 @@ func TestApplyEnvInvalid(t *testing.T) {
 }
 
 func TestFindConfigFile(t *testing.T) {
+	// FindConfigFile also checks "." as a fallback, so isolate cwd to the
+	// temp dir to avoid picking up this repo's own .versioner.json.
 	dir := t.TempDir()
+	orig, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(orig) })
 	if FindConfigFile(dir) != "" {
 		t.Error("expected no config file yet")
 	}
