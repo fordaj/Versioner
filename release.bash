@@ -2,15 +2,18 @@
 # release.bash — dogfooding release for versioner.
 #
 # Uses versioner itself to compute the next tag, cross-compiles the
-# release binaries for injection (ldflags toolVersion=$TAG), tags HEAD,
-# and publishes a GitHub release with the binaries + SHA-256 checksums.
+# release binaries for injection (ldflags toolVersion=$TAG), packs each
+# architecture into Versioner_<tag>_<arch>.7z (binary + README + LICENSE
+# + example config), tags HEAD, and publishes a GitHub release with
+# the .7z archives + SHA-256 checksums.
 #
 # Usage:
 #   ./release.bash           # tag + push + GitHub release
 #   ./release.bash --dry-run # compute + build only, touch nothing remote
 #
-# Prerequisites: go, git, make, and (for the real release) gh authenticated
-# via `gh auth login`. Working tree must be clean; HEAD should be pushed.
+# Prerequisites: go, git, make, 7z (brew install p7zip / apt install
+# p7zip-full), and (for the real release) gh authenticated via
+# `gh auth login`. Working tree must be clean; HEAD should be pushed.
 
 set -euo pipefail
 
@@ -21,8 +24,10 @@ usage() {
 Usage: ./release.bash [--dry-run]
 
 Compute the next version with versioner itself (dogfooding), cross-compile
-the release binaries (see Makefile `cross`), create an annotated tag,
-push it, and create a GitHub release with the binaries + checksums.
+the release binaries (see Makefile `cross`) into dist/<arch>/versioner[.exe],
+pack each into Versioner_<tag>_<arch>.7z (binary + README.md + LICENSE +
+versioner.example.json), create an annotated tag, push it, and create a
+GitHub release with the .7z archives + checksums.
 
 Flags:
   --dry-run, -n   Build + compute version, but do not tag/push/release.
@@ -49,6 +54,14 @@ need_cmd() {
 }
 
 for cmd in git go make; do need_cmd "$cmd"; done
+
+if command -v 7zz >/dev/null 2>&1; then
+    SEVENZIP=7zz
+elif command -v 7z >/dev/null 2>&1; then
+    SEVENZIP=7z
+else
+    die "required command not found: 7z/7zz (brew install p7zip / apt-get install p7zip-full)"
+fi
 
 if [[ "$DRY_RUN" -ne 1 ]]; then
     need_cmd gh
@@ -130,18 +143,28 @@ log "cross-compiling release binaries (VERSION=$TAG) via make cross..."
 VERSION="$TAG" make cross
 
 shopt -s nullglob
-assets=(dist/versioner-*)
-(( ${#assets[@]} > 0 )) || die "make cross produced no binaries in dist/"
-for f in "${assets[@]}"; do
-    [[ -s "$f" ]] || die "built binary is empty: $f"
+arch_dirs=(dist/*/)
+(( ${#arch_dirs[@]} > 0 )) || die "make cross produced no dist/<arch>/ directories"
+log "built ${#arch_dirs[@]} architecture directories:"
+for d in "${arch_dirs[@]}"; do log "  $d"; done
+
+# Stage user docs next to each binary (dist/<arch>/README.md, LICENSE,
+# versioner.example.json) for inclusion in the .7z archives.
+for d in "${arch_dirs[@]}"; do
+    for doc in README.md LICENSE versioner.example.json; do
+        [[ -f "$doc" ]] || die "missing $doc (needed for .7z archives)"
+        cp -p "$doc" "$d/"
+    done
 done
-log "built ${#assets[@]} binaries:"
-for f in "${assets[@]}"; do log "  $f"; done
 
 # Native binary should report our tag (guards ldflags wiring).
 NATIVE_OS="$(go env GOOS)"
 NATIVE_ARCH="$(go env GOARCH)"
-NATIVE_BIN="dist/versioner-${NATIVE_OS}-${NATIVE_ARCH}"
+if [[ "$NATIVE_OS" == "windows" ]]; then
+    NATIVE_BIN="dist/${NATIVE_OS}-${NATIVE_ARCH}/versioner.exe"
+else
+    NATIVE_BIN="dist/${NATIVE_OS}-${NATIVE_ARCH}/versioner"
+fi
 if [[ -x "$NATIVE_BIN" ]]; then
     NATIVE_VER="$("$NATIVE_BIN" --version)"
     log "native binary reports: $NATIVE_VER"
@@ -151,12 +174,34 @@ if [[ -x "$NATIVE_BIN" ]]; then
     esac
 fi
 
-# Checksums (portable shasum; sha256sum fallback).
+# Pack each architecture into Versioner_<tag>_<arch>.7z (flat: binary +
+# README.md + LICENSE + versioner.example.json at archive root).
+log "packing .7z archives with $SEVENZIP..."
+archives=()
+for d in "${arch_dirs[@]}"; do
+    arch="$(basename "$d")"
+    bin=""
+    for cand in "${d}versioner" "${d}versioner.exe"; do
+        [[ -f "$cand" ]] && bin="$cand"
+    done
+    [[ -n "$bin" ]] || die "no versioner binary in $d"
+    [[ -s "$bin" ]] || die "built binary is empty: $bin"
+    bin_name="$(basename "$bin")"
+    archive="dist/Versioner_${TAG}_${arch}.7z"
+    rm -f "$archive"
+    (cd "$d" && "$SEVENZIP" a -t7z "../Versioner_${TAG}_${arch}.7z" "$bin_name" README.md LICENSE versioner.example.json >/dev/null)
+    [[ -s "$archive" ]] || die "failed to create $archive"
+    log "  $archive:"
+    "$SEVENZIP" l "$archive" | sed 's/^/release.bash:     /'
+    archives+=("$archive")
+done
+
+# Checksums of the .7z archives (portable shasum; sha256sum fallback).
 log "generating checksums..."
 if command -v shasum >/dev/null 2>&1; then
-    (cd dist && shasum -a 256 versioner-* > checksums.txt)
+    (cd dist && shasum -a 256 Versioner_*.7z > checksums.txt)
 elif command -v sha256sum >/dev/null 2>&1; then
-    (cd dist && sha256sum versioner-* > checksums.txt)
+    (cd dist && sha256sum Versioner_*.7z > checksums.txt)
 else
     die "neither shasum nor sha256sum found (need one for checksums)"
 fi
@@ -167,7 +212,7 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     log "DRY RUN: would run:"
     log "  git tag -a $TAG -m \"versioner $TAG\""
     log "  git push origin $TAG"
-    log "  gh release create $TAG --title \"versioner $TAG\" --generate-notes dist/versioner-* dist/checksums.txt"
+    log "  gh release create $TAG --title \"versioner $TAG\" --generate-notes dist/Versioner_*.7z dist/checksums.txt"
     log "dry run complete: VERSION=$VERSION TAG=$TAG"
     exit 0
 fi
@@ -179,14 +224,14 @@ log "pushing tag $TAG..."
 git push origin "$TAG"
 
 if gh release view "$TAG" >/dev/null 2>&1; then
-    die "GitHub release $TAG already exists (tag was pushed; upload assets manually with: gh release upload $TAG dist/versioner-* dist/checksums.txt --clobber)"
+    die "GitHub release $TAG already exists (tag was pushed; upload assets manually with: gh release upload $TAG dist/Versioner_*.7z dist/checksums.txt --clobber)"
 fi
 
-log "creating GitHub release $TAG with ${#assets[@]} binaries + checksums..."
+log "creating GitHub release $TAG with ${#archives[@]} .7z archives + checksums..."
 gh release create "$TAG" \
     --title "versioner $TAG" \
     --generate-notes \
-    dist/versioner-* dist/checksums.txt
+    "${archives[@]}" dist/checksums.txt
 
 if REPO_SLUG="$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)" && [[ -n "$REPO_SLUG" ]]; then
     log "release: https://github.com/$REPO_SLUG/releases/tag/$TAG"

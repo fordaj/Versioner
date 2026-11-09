@@ -63,11 +63,12 @@ make cross
 Cross-compiled artifacts are pure Go with `CGO_ENABLED=0`:
 
 ```sh
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -o dist/versioner-linux-amd64 .
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -o dist/linux-amd64/versioner .
 ```
 
-`make cross` builds `darwin/amd64`, `darwin/arm64`, `linux/amd64`,
-`linux/arm64`, and `windows/amd64`.
+`make cross` builds `dist/<arch>/versioner[.exe]` for
+`darwin-amd64`, `darwin-arm64`, `linux-amd64`, `linux-arm64`, and
+`windows-amd64` (the `.exe` suffix on Windows only).
 
 ## Releases
 
@@ -92,16 +93,23 @@ What it does:
 3. Validates the tag and aborts if it already exists locally or on
    `origin` (make a new `feat:`/`fix:` commit to bump the version, then
    re-run).
-4. Runs `make cross` (`VERSION=$TAG`) → five binaries in `dist/` plus
-   `dist/checksums.txt` (SHA-256 via `shasum` or `sha256sum`).
+4. Runs `make cross` (`VERSION=$TAG`) → one binary per architecture in
+   `dist/<arch>/versioner[.exe]`. It then stages `README.md`, `LICENSE`,
+   and `versioner.example.json` next to each binary and packs each
+   architecture into `dist/Versioner_<tag>_<arch>.7z` (flat archive of
+   those four files). Finally it writes `dist/checksums.txt` (SHA-256 via
+   `shasum` or `sha256sum`) hashing the `.7z` files. Requires `7z`
+   (`brew install p7zip` / `apt-get install p7zip-full`).
 5. Creates an annotated tag, pushes it, and creates the GitHub release
-   (`gh release create --generate-notes`) with all binaries + checksums.
+   (`gh release create --generate-notes`) with the five `.7z` archives +
+   `checksums.txt`.
 
 The working tree must be clean (no uncommitted changes) and `HEAD`
 should already be pushed when starting a real release. `--dry-run`
 still builds everything but skips tag/push/release; a dirty tree is
 only warned about in dry-run mode. To verify a built binary, run
-`./dist/versioner-<os>-<arch> --version` and `shasum -a 256 -c dist/checksums.txt`.
+`./dist/<os>-<arch>/versioner --version` (or extract a `.7z` first, e.g.
+`7z x dist/Versioner_<tag>_<arch>.7z`) and `shasum -a 256 -c dist/checksums.txt`.
 
 ## Usage
 

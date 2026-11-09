@@ -29,8 +29,11 @@ Go dependencies.
 - `*_test.go` — table/'stubbed-git' unit tests.
 - `Makefile` — `build`/`test`/`vet`/`cross`/`clean`.
 - `release.bash` — dogfooding release: builds `versioner`, computes
-  `TAG`, runs `make cross` with `VERSION=$TAG`, tags/pushes, and
-  `gh release create`s binaries + checksums (`--dry-run` to preview).
+  `TAG`, runs `make cross` with `VERSION=$TAG` to
+  `dist/<arch>/versioner[.exe]`, packs each into
+  `dist/Versioner_<tag>_<arch>.7z` with README/LICENSE/example config,
+  tags/pushes, and `gh release create`s the `.7z` archives + checksums
+  (`--dry-run` to preview).
 - `versioner.example.json` — copy to `.versioner.json` to configure a project.
 - `README.md` — user-facing docs. Keep flag/env/config tables in sync with
   `main.go` and `config.go`.

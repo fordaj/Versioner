@@ -27,15 +27,19 @@ install:
 cross:
 	mkdir -p $(DIST)
 	for target in \
-		"darwin amd64 $(DIST)/$(BIN)-darwin-amd64" \
-		"darwin arm64 $(DIST)/$(BIN)-darwin-arm64" \
-		"linux amd64 $(DIST)/$(BIN)-linux-amd64" \
-		"linux arm64 $(DIST)/$(BIN)-linux-arm64" \
-		"windows amd64 $(DIST)/$(BIN)-windows-amd64.exe" \
+		"darwin amd64" \
+		"darwin arm64" \
+		"linux amd64" \
+		"linux arm64" \
+		"windows amd64" \
 	; do \
 		set -- $$target; \
-		echo "building $$1/$$2 -> $$3"; \
-		CGO_ENABLED=0 GOOS=$$1 GOARCH=$$2 go build $(LDFLAGS) -o $$3 .; \
+		arch="$$1-$$2"; \
+		bin="versioner"; \
+		if [ "$$1" = "windows" ]; then bin="versioner.exe"; fi; \
+		mkdir -p "$(DIST)/$$arch"; \
+		echo "building $$arch -> $(DIST)/$$arch/$$bin"; \
+		CGO_ENABLED=0 GOOS=$$1 GOARCH=$$2 go build $(LDFLAGS) -o "$(DIST)/$$arch/$$bin" .; \
 	done
 
 clean:
