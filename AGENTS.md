@@ -28,6 +28,9 @@ Go dependencies.
   `ApplyBump`), git plumbing via a stubbable `gitRun` func var, `Compute`.
 - `*_test.go` — table/'stubbed-git' unit tests.
 - `Makefile` — `build`/`test`/`vet`/`cross`/`clean`.
+- `release.bash` — dogfooding release: builds `versioner`, computes
+  `TAG`, runs `make cross` with `VERSION=$TAG`, tags/pushes, and
+  `gh release create`s binaries + checksums (`--dry-run` to preview).
 - `versioner.example.json` — copy to `.versioner.json` to configure a project.
 - `README.md` — user-facing docs. Keep flag/env/config tables in sync with
   `main.go` and `config.go`.
@@ -81,6 +84,7 @@ go vet ./...        # must pass
 go test ./...       # must pass; add coverage for new pure logic
 make build          # ./versioner
 make cross          # ./dist/ binaries for 5 targets
+./release.bash --dry-run  # preview dogfooding release (no tag/push)
 ```
 
 - Use `gofmt`; run `go vet`/`go test` before finishing any change.

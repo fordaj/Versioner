@@ -69,6 +69,40 @@ GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -o dist/versioner-linux
 `make cross` builds `darwin/amd64`, `darwin/arm64`, `linux/amd64`,
 `linux/arm64`, and `windows/amd64`.
 
+## Releases
+
+`release.bash` cuts a release by **dogfooding** `versioner`: it builds
+`versioner` from source, uses it to compute the next `VERSION`/`TAG`,
+cross-compiles the binaries with that tag injected
+(`-X main.toolVersion=$TAG`, so `versioner --version` reports the release),
+tags `HEAD`, pushes the tag, and publishes a GitHub release.
+
+```sh
+./release.bash              # compute version, cross-compile, tag, push, gh release create
+./release.bash --dry-run    # compute + build only; touch nothing remote
+./release.bash --help       # usage
+```
+
+What it does:
+
+1. Checks prerequisites (`go`, `git`, `make`, plus authenticated `gh`
+   for the real release) and a clean working tree.
+2. Builds `versioner` from source (or uses `$VERSIONER_BIN` if set) and
+   runs it against the current repo to compute `VERSION`/`TAG`.
+3. Validates the tag and aborts if it already exists locally or on
+   `origin` (make a new `feat:`/`fix:` commit to bump the version, then
+   re-run).
+4. Runs `make cross` (`VERSION=$TAG`) → five binaries in `dist/` plus
+   `dist/checksums.txt` (SHA-256 via `shasum` or `sha256sum`).
+5. Creates an annotated tag, pushes it, and creates the GitHub release
+   (`gh release create --generate-notes`) with all binaries + checksums.
+
+The working tree must be clean (no uncommitted changes) and `HEAD`
+should already be pushed when starting a real release. `--dry-run`
+still builds everything but skips tag/push/release; a dirty tree is
+only warned about in dry-run mode. To verify a built binary, run
+`./dist/versioner-<os>-<arch> --version` and `shasum -a 256 -c dist/checksums.txt`.
+
 ## Usage
 
 Run inside (or point at) a git repo:
