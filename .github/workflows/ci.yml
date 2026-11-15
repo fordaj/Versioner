@@ -7,9 +7,14 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-formatting:
     name: Check Formatting
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -32,7 +37,7 @@ jobs:
 
       # goimports via `go install` (lands in $(go env GOPATH)/bin).
       - name: Install goimports
-        run: go install golang.org/x/tools/cmd/goimports@latest
+        run: go install golang.org/x/tools/cmd/goimports@v0.30.0
 
       # uv for the Python side (formattington via uv run). uv also
       # fetches CPython 3.14 on first use.
@@ -54,17 +59,18 @@ jobs:
           set -euo pipefail
           bin_dir="$RUNNER_TEMP/fmt-bin"
           mkdir -p "$bin_dir"
+          suffix=""
           case "$(uname -s)-$(uname -m)" in
             Darwin-x86_64)                 s=shfmt_v3.14.1_darwin_amd64 ;;
             Darwin-arm64)                  s=shfmt_v3.14.1_darwin_arm64 ;;
             Linux-x86_64)                  s=shfmt_v3.14.1_linux_amd64 ;;
             Linux-aarch64|Linux-arm64)     s=shfmt_v3.14.1_linux_arm64 ;;
-            MINGW*-x86_64|MSYS*-x86_64|CYGWIN*-x86_64) s=shfmt_v3.14.1_windows_amd64.exe ;;
-            MINGW*-aarch64|MSYS*-aarch64|CYGWIN*-aarch64|*arm64)   s=shfmt_v3.14.1_windows_amd64.exe ;;
+            MINGW*-x86_64|MSYS*-x86_64|CYGWIN*-x86_64) s=shfmt_v3.14.1_windows_amd64.exe; suffix=.exe ;;
+            MINGW*-aarch64|MSYS*-aarch64|CYGWIN*-aarch64|*arm64)   s=shfmt_v3.14.1_windows_amd64.exe; suffix=.exe ;;
             *) echo "unsupported platform: $(uname -s) $(uname -m)" >&2; exit 2 ;;
           esac
-          curl -fsSL "https://github.com/mvdan/sh/releases/download/v3.14.1/$s" -o "$bin_dir/shfmt"
-          chmod +x "$bin_dir/shfmt"
+          curl -fsSL "https://github.com/mvdan/sh/releases/download/v3.14.1/$s" -o "$bin_dir/shfmt$suffix"
+          chmod +x "$bin_dir/shfmt$suffix"
           echo "$bin_dir" >> "$GITHUB_PATH"
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
@@ -82,6 +88,7 @@ jobs:
 
   test:
     name: Test (${{ matrix.os }})
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
