@@ -28,44 +28,46 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: ./repo
     steps:
       # Clone the repo with mirror-clone when available; fall back to
       # git clone otherwise (or if mirror-clone fails). A full clone is
       # required for the git-tag-derived version checks.
       - name: Clone Repo
+        # Job default is ./repo, but ./repo is created by this step.
+        working-directory: .
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          # Leave the workspace before deleting it: git cannot run from
-          # a cwd that no longer exists.
           cd "${RUNNER_TEMP:-/tmp}"
           branch="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
-          rm -rf "$GITHUB_WORKSPACE"
-          mkdir -p "$GITHUB_WORKSPACE"
+          clone_dir="$GITHUB_WORKSPACE/repo"
+          rm -rf "$clone_dir"
+          mkdir -p "$clone_dir"
           if command -v mirror-clone >/dev/null 2>&1; then
             echo "using mirror-clone"
             mirror-clone --branch "$branch" \
               "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-              "$GITHUB_WORKSPACE" || {
+              "$clone_dir" || {
                 echo "mirror-clone failed; falling back to git clone"
-                rm -rf "$GITHUB_WORKSPACE"
-                mkdir -p "$GITHUB_WORKSPACE"
+                rm -rf "$clone_dir"
+                mkdir -p "$clone_dir"
                 git clone --branch "$branch" \
                   "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-                  "$GITHUB_WORKSPACE"
+                  "$clone_dir"
               }
           else
             echo "mirror-clone not installed; using git clone"
             git clone --branch "$branch" \
               "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-              "$GITHUB_WORKSPACE"
+              "$clone_dir"
           fi
 
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: ./repo/go.mod
           cache: false
 
       # goimports via `go install` (lands in $(go env GOPATH)/bin).
@@ -147,43 +149,45 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: ./repo
     steps:
       # Clone the repo with mirror-clone when available; fall back to
       # git clone otherwise (or if mirror-clone fails). A full clone is
       # required for the git-tag-derived version checks.
       - name: Clone Repo
+        # Job default is ./repo, but ./repo is created by this step.
+        working-directory: .
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          # Leave the workspace before deleting it: git cannot run from
-          # a cwd that no longer exists.
           cd "${RUNNER_TEMP:-/tmp}"
           branch="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
-          rm -rf "$GITHUB_WORKSPACE"
-          mkdir -p "$GITHUB_WORKSPACE"
+          clone_dir="$GITHUB_WORKSPACE/repo"
+          rm -rf "$clone_dir"
+          mkdir -p "$clone_dir"
           if command -v mirror-clone >/dev/null 2>&1; then
             echo "using mirror-clone"
             mirror-clone --branch "$branch" \
               "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-              "$GITHUB_WORKSPACE" || {
+              "$clone_dir" || {
                 echo "mirror-clone failed; falling back to git clone"
-                rm -rf "$GITHUB_WORKSPACE"
-                mkdir -p "$GITHUB_WORKSPACE"
+                rm -rf "$clone_dir"
+                mkdir -p "$clone_dir"
                 git clone --branch "$branch" \
                   "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-                  "$GITHUB_WORKSPACE"
+                  "$clone_dir"
               }
           else
             echo "mirror-clone not installed; using git clone"
             git clone --branch "$branch" \
               "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-              "$GITHUB_WORKSPACE"
+              "$clone_dir"
           fi
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: ./repo/go.mod
           cache: false
       - run: go vet ./...
       - run: gofmt -l . && test -z "$(gofmt -l .)"
