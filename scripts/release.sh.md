@@ -1,11 +1,25 @@
 # The release pipeline (`scripts/release.sh`)
 
+```mermaid
+flowchart TD
+    Pre["prerequisites: git go make tar zip<br/>(gh for a real release); clean tree"] --> Throwaway["build throwaway versioner<br/>in a mktemp dir"]
+    Throwaway --> Compute["compute VERSION and TAG"]
+    Compute --> Guard{"tag exists locally or on origin?"}
+    Guard -- "no" --> Cross["VERSION=TAG make cross<br/>5 targets, stamps TAG"]
+    Guard -- "yes" --> Die["abort; add a feat/fix commit"]
+    Cross --> Stage["stage README and LICENSE<br/>next to each binary"]
+    Stage --> Pack["pack dist archives<br/>+ checksums.txt"]
+    Pack --> Ship["annotated tag, push,<br/>gh release create"]
+    click Compute href "../version.go.md"
+    click Cross href "build.sh.md"
+```
+
 Cuts a release by **dogfooding** `versioner`: it builds `versioner` from
 source, uses it to compute the next `VERSION`/`TAG`, cross-compiles the
 binaries with that tag stamped in (`-X main.toolVersion=$TAG`), tags
 `HEAD`, pushes the tag, and publishes a GitHub release. Unlike the other
 scripts here, it is self-contained (its own `log`/`die`); it does **not**
-source [entry.sh](entry.md).
+source [entry.sh](entry.sh.md).
 
 ## Usage
 
@@ -50,13 +64,13 @@ release) without touching anything remote.
 
 - `VERSIONER_BIN` is the only environment override (a prebuilt
   versioner for the version computation — not to be confused with the
-  bundle pins in the [cascade](env.md), which are unused here).
+  bundle pins in the [cascade](env.sh.md), which are unused here).
 - `dist/` is git-ignored; archives and checksums are never committed.
 - Prerequisites for a real release: `HEAD` should already be pushed and
   `gh auth login` done.
 
 ## Related pages
 
-- [build.md](build.md) — the cross-compile this depends on (via `make cross`)
-- [version.md](version.md) — the version computation it dogfoods
-- [entry.md](entry.md) · [env.md](env.md) — the cascade this script does _not_ use
+- [build.sh.md](build.sh.md) — the cross-compile this depends on (via `make cross`)
+- [version.sh.md](version.sh.md) — the version computation it dogfoods
+- [entry.sh.md](entry.sh.md) · [env.sh.md](env.sh.md) — the cascade this script does _not_ use

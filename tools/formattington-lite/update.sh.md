@@ -1,5 +1,15 @@
 # The formattington-lite bundle (`tools/formattington-lite/`)
 
+```mermaid
+flowchart TD
+    Tag["resolve tag: latest via gh<br/>(or --tag / FORMATTINGTON_TAG)"] --> DL["gh release download<br/>archives + checksums"]
+    DL --> Filter["keep -lite assets only<br/>(the one discriminating bundle)"]
+    Filter --> Extract["extract; normalize platform names<br/>darwin-amd64 to macos-x86_64"]
+    Extract --> Swap["swap v_tag/ dir, delete superseded,<br/>smoke test formattington --version"]
+    Swap --> Done["bundle refreshed; this repo formats<br/>via format.sh + uv, not this binary"]
+    click Done href "../../scripts/format.sh.md"
+```
+
 [Formattington](https://github.com/fordaj/formattington) is a formatting
 orchestrator; the `-lite` assets are its bare program without embedded
 formatter executables (the `-full` assets embed them). This bundle pins
@@ -41,11 +51,12 @@ does not contain `-lite`, e.g. the `-full` builds, are ignored),
 file is a warning (not fatal).
 
 `--dry-run` lists assets without touching anything; `--help` prints
-usage. It can run from any directory.
+usage. The script sources [`scripts/entry.sh`](../../scripts/entry.sh.md) for
+logging and can run from any directory.
 
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
 - [../update.md](../update.md) — the shared implementation behind this wrapper
-- [../../format.md](../../scripts/format.md) — how this repo actually runs formattington (via `uv`)
+- [../../scripts/format.sh.md](../../scripts/format.sh.md) — how this repo actually runs formattington (via `uv`)
 - [../../scripts/README.md](../../scripts/README.md) — the scripts directory

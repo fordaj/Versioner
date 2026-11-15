@@ -4,7 +4,7 @@
 `tools/<name>/update.sh`. Each bundle's `update.sh` is a thin wrapper
 that exports the per-tool settings below and `exec`s this script — the
 download/verify/stage/swap logic lives here exactly once. It can run
-from anywhere; logging comes from [`scripts/entry.sh`](../scripts/entry.md).
+from anywhere; logging comes from [`scripts/entry.sh`](../scripts/entry.sh.md).
 
 ## What it does
 
@@ -48,4 +48,4 @@ legacy `.7z`).
 ## Related pages
 
 - [README.md](README.md) — the bundle index
-- [barnacle/update.md](barnacle/update.md), [formattington-lite/update.md](formattington-lite/update.md), [logamuffin/update.md](logamuffin/update.md), [runner-spawner/update.md](runner-spawner/update.md) — the per-tool wrappers
+- [barnacle/update.sh.md](barnacle/update.sh.md), [formattington-lite/update.sh.md](formattington-lite/update.sh.md), [logamuffin/update.sh.md](logamuffin/update.sh.md), [runner-spawner/update.sh.md](runner-spawner/update.sh.md) — the per-tool wrappers

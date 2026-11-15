@@ -1,10 +1,21 @@
 # The script entry point (`scripts/entry.sh`)
 
-Every repository script (except [release.md](release.md), which is
+```mermaid
+flowchart TD
+    Scripts["repo scripts and tools/*/update.sh"] --> Entry["entry.sh"]
+    Entry --> Env["sources env.sh via \$ENTRY_DIR"]
+    Entry --> Log["defines log LEVEL MESSAGE..."]
+    Log --> HasBin{"LOGAMUFFIN_BIN executable?"}
+    HasBin -- "yes" --> La["logamuffin binary<br/>LOG_SOURCE passed through"]
+    HasBin -- "no" --> Printf["printf fallback<br/>same call shape"]
+    click Env href "env.sh.md"
+```
+
+Every repository script (except [release.sh.md](release.sh.md), which is
 self-contained) sources `scripts/entry.sh` instead of the individual
 cascade files, because it does two jobs at once:
 
-1. **It loads the environment** — it sources [env.md](env.md) via
+1. **It loads the environment** — it sources [env.sh.md](env.sh.md) via
    `$ENTRY_DIR/env.sh`.
 2. **It defines `log()`** — the shared logging function used by every
    script here and by the `tools/<name>/update.sh` refreshers.
@@ -12,7 +23,7 @@ cascade files, because it does two jobs at once:
 ## `log()` semantics
 
 `log LEVEL MESSAGE...` forwards to the pinned logamuffin binary (bundle:
-`tools/logamuffin/`, documented in `tools/logamuffin/update.md`) referenced
+`tools/logamuffin/`, documented in `tools/logamuffin/update.sh.md`) referenced
 by `LOGAMUFFIN_BIN`. The caller context is passed through in `LOG_SOURCE`
 (`file[:function]:line` — `BASH_SOURCE[1]`, `BASH_LINENO[0]`,
 `FUNCNAME[1]`), and logamuffin's own exit code (`0`, or `2` for
@@ -38,6 +49,6 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 ## Related pages
 
-- [env.md](env.md) — the cascade `entry.sh` loads
-- [version.md](version.md) — the version script that sources `entry.sh`
-- [build.md](build.md) · [docs.md](docs.md) — other consumers
+- [env.sh.md](env.sh.md) — the cascade `entry.sh` loads
+- [version.sh.md](version.sh.md) — the version script that sources `entry.sh`
+- [build.sh.md](build.sh.md) · [docs.sh.md](docs.sh.md) — other consumers

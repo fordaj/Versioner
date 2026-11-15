@@ -1,5 +1,19 @@
 # Versioner
 
+```mermaid
+flowchart LR
+    Git[git history<br/>describe --tags, commit log] --> Compute[Compute<br/>version.go.md]
+    Cfg[Config layering<br/>config.go.md] --> Compute
+    CLI[CLI wiring<br/>main.go.md] --> Compute
+    Compute --> Text[text output<br/>LAST_TAG / VERSION / TAG]
+    Compute --> Fmt[shell and json formats]
+    CLI --> Release[release pipeline<br/>scripts/release.sh.md]
+    click Compute href "version.go.md"
+    click Cfg href "config.go.md"
+    click CLI href "main.go.md"
+    click Release href "scripts/release.sh.md"
+```
+
 `versioner` computes a version number from git history.
 
 It shells out to `git` (so `git` must be on `PATH`) but the binary itself
@@ -309,9 +323,11 @@ Windows).
 ## Documentation
 
 The repository documents itself with sibling `.md` pages next to the code
-(see `AGENTS.md`, "Documentation files (barnacle)"). Generate the static
-site with `scripts/docs.sh` (output: `./site/`, git-ignored); the rules
-for keeping the pages current live in `AGENTS.md` and `scripts/docs.md`.
+(see `AGENTS.md`, "Documentation files (barnacle)"). Every page opens with
+a Mermaid diagram, and pages documenting a file retain its suffix
+(`main.go` → `main.go.md`). Generate the static site with `scripts/docs.sh`
+(output: `./site/`, git-ignored); the rules for keeping the pages current
+live in `AGENTS.md` and `scripts/docs.sh.md`.
 
 ## Formatting and CI
 

@@ -1,8 +1,18 @@
 # The logamuffin bundle (`tools/logamuffin/`)
 
+```mermaid
+flowchart TD
+    Tag["resolve tag: latest via gh<br/>(or --tag / LOGAMUFFIN_TAG)"] --> DL["gh release download<br/>archives + checksums"]
+    DL --> Verify["sha256 verify when present;<br/>warn and skip otherwise"]
+    Verify --> Extract["extract; normalize platform names<br/>darwin-amd64 to macos-x86_64"]
+    Extract --> Swap["swap v_tag/ dir, delete superseded,<br/>smoke test logamuffin --version"]
+    Swap --> Done["LOGAMUFFIN_BIN feeds log()<br/>in scripts/entry.sh"]
+    click Done href "../../scripts/entry.sh.md"
+```
+
 [Logamuffin](https://github.com/fordaj/logamuffin) is the structured
 logging backend for the `log()` function defined in
-[`scripts/entry.sh`](../../scripts/entry.md). Every script in `scripts/`
+[`scripts/entry.sh`](../../scripts/entry.sh.md). Every script in `scripts/`
 and every `tools/<name>/update.sh` logs through it (with a printf
 fallback when the binary is absent).
 
@@ -34,17 +44,18 @@ only the binary is kept, missing checksums file is a warning (not
 fatal).
 
 `--dry-run` lists assets without touching anything; `--help` prints
-usage. It can run from any directory.
+usage. The script sources [`scripts/entry.sh`](../../scripts/entry.sh.md) for
+logging and can run from any directory.
 
 ## How the repository uses it
 
-[`scripts/entry.sh`](../../scripts/entry.md) forwards `log()` calls to the
+[`scripts/entry.sh`](../../scripts/entry.sh.md) forwards `log()` calls to the
 binary at `LOGAMUFFIN_BIN` (selected by the
-[cascade](../../scripts/env.md)), passing the call site's `file:line` in
+[cascade](../../scripts/env.sh.md)), passing the call site's `file:line` in
 `LOG_SOURCE`.
 
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
 - [../update.md](../update.md) — the shared implementation behind this wrapper
-- [../../scripts/entry.md](../../scripts/entry.md) — the `log()` consumer
+- [../../scripts/entry.sh.md](../../scripts/entry.sh.md) — the `log()` consumer

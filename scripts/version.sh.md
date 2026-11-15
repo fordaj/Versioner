@@ -1,5 +1,18 @@
 # The version script (`scripts/version.sh`)
 
+```mermaid
+flowchart TD
+    Script["scripts/version.sh"] --> Set{"VERSIONER_BIN set and executable?"}
+    Set -- "yes" --> Bin["run VERSIONER_BIN"]
+    Set -- "no" --> Go["go run . (this repo IS versioner)"]
+    Bin --> Quiet["--repo-dir DIR --quiet"]
+    Go --> Quiet
+    Quiet --> Parse["sed-parse VERSION= and TAG="]
+    Parse --> Out["text / shell / json"]
+    click Go href "../version.go.md"
+    click Bin href "env.sh.md"
+```
+
 Prints the version of this repository as computed by `versioner` — the same
 computation the release pipeline dogfoods, so a local build and the
 published tag can never drift apart.
@@ -18,7 +31,7 @@ prints usage. Unknown arguments are a usage error (exit `2`).
 
 ## How it works
 
-Sources [entry.md](entry.md) for the [cascade](env.md) and `log()`.
+Sources [entry.sh.md](entry.sh.md) for the [cascade](env.sh.md) and `log()`.
 `VERSIONER_REPO_DIR` (or the repository root from `REPO_ROOT_DIR`) selects
 the repository, defaulting to the parent of `scripts/`.
 
@@ -36,12 +49,12 @@ and `shell` formats it re-prints only `VERSION=`/`TAG=` (or
 
 ## Consumers
 
-- [build.md](build.md) — `eval`s `--format shell` output to stamp
+- [build.sh.md](build.sh.md) — `eval`s `--format shell` output to stamp
   `main.toolVersion` into the cross-compiled binaries.
-- [release.md](release.md) — builds versioner from source itself (it does
+- [release.sh.md](release.sh.md) — builds versioner from source itself (it does
   not call this script) to compute the release tag.
 
 ## Related pages
 
-- [entry.md](entry.md) · [env.md](env.md)
-- [../config.md](../config.md) — the `VERSIONER_*` variables the binary honours
+- [entry.sh.md](entry.sh.md) · [env.sh.md](env.sh.md)
+- [../config.go.md](../config.go.md) — the `VERSIONER_*` variables the binary honours

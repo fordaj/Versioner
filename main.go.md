@@ -1,8 +1,19 @@
 # The CLI entry point (`main.go`)
 
+```mermaid
+flowchart TD
+    Args["os.Args minus argv[0]"] --> Parse["flag.NewFlagSet<br/>ContinueOnError"]
+    Parse --> Layer["layered config resolution<br/>defaults, file, env, flags"]
+    Layer --> Compute[Compute<br/>version.go.md]
+    Compute --> Out["writeOutput<br/>text / shell / json"]
+    Out --> Exit["exitCode(err)<br/>0 ok, 1 compute, 2 usage"]
+    click Layer href "config.go.md"
+    click Compute href "version.go.md"
+```
+
 `main.go` is the `versioner` command: it parses flags, layers
 configuration (defaults → `.versioner.json` → `VERSIONER_*` env → flags),
-runs the computation in [version.md](version.md), and writes the result in
+runs the computation in [version.go.md](version.go.md), and writes the result in
 one of three formats.
 
 ## Entry point and exit codes
@@ -22,7 +33,7 @@ config. `codedError` carries the code; `configErrf` builds exit-`2`,
 `--head`, `--branch`, `--tag-pattern`, `--default-branch-version`
 (sentinel `-1`), `--format`, `--quiet`, `--version`, and repeatable
 `--exempt-branch` (`exemptFlag`, parsed with `ParseExemptBranches` from
-[config.md](config.md); JSON also accepted). `-h`/`--help` prints usage,
+[config.go.md](config.go.md); JSON also accepted). `-h`/`--help` prints usage,
 exit `0`; positional arguments reject with exit `2`. Unset flags never
 clobber env/file values — every flag defaults to a sentinel (`""`, `-1`,
 `false`) checked before applying.
@@ -55,6 +66,6 @@ clobber env/file values — every flag defaults to a sentinel (`""`, `-1`,
 
 ## Related pages
 
-- [config.md](config.md) — the `Config` struct, env vars, precedence
-- [version.md](version.md) — the computation invoked by `run`
+- [config.go.md](config.go.md) — the `Config` struct, env vars, precedence
+- [version.go.md](version.go.md) — the computation invoked by `run`
 - [README.md](README.md) — flag/env/config reference for users

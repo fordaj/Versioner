@@ -1,5 +1,15 @@
 # The runner-spawner bundle (`tools/runner-spawner/`)
 
+```mermaid
+flowchart TD
+    Tag["resolve tag: latest via gh<br/>(or --tag / RUNNER_SPAWNER_TAG)"] --> DL["gh release download<br/>archives + checksums"]
+    DL --> Verify["sha256 verify; no checksums file:<br/>refuse to install (fails closed)"]
+    Verify --> Extract["extract; normalize platform names<br/>darwin-amd64 to macos-x86_64"]
+    Extract --> Swap["swap v_tag/ dir, delete superseded,<br/>smoke test runner-spawner --version"]
+    Swap --> Done["RUNNER_SPAWNER_BIN feeds<br/>self-hosted CI runners"]
+    click Done href "../../scripts/env.sh.md"
+```
+
 [Runner-spawner](https://github.com/fordaj/runner-spawner) provisions
 self-hosted GitHub Actions runners. This repository's CI (`.github/
 workflows/ci.yml`) runs on self-hosted macOS and Windows runners managed
@@ -41,10 +51,11 @@ SHA256SUMS.txt in <tag> release; refusing to install unverified
 binaries`) — the only bundle that fails closed.
 
 `--dry-run` lists assets without touching anything; `--help` prints
-usage. It can run from any directory.
+usage. The script sources [`scripts/entry.sh`](../../scripts/entry.sh.md) for
+logging and can run from any directory.
 
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
 - [../update.md](../update.md) — the shared implementation behind this wrapper
-- [../../scripts/env.md](../../scripts/env.md) — the cascade that selects `RUNNER_SPAWNER_BIN`
+- [../../scripts/env.sh.md](../../scripts/env.sh.md) — the cascade that selects `RUNNER_SPAWNER_BIN`

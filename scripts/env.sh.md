@@ -1,5 +1,15 @@
 # The environment cascade (`scripts/env.sh` + the hidden `.*.env` files)
 
+```mermaid
+flowchart TD
+    Env["scripts/env.sh<br/>sourced, never executed"] --> Locate["locate cascade:<br/>BASH_SOURCE or ZSH_VERSION"]
+    Locate --> Common["source .common.env<br/>TOOLS_DIR, upstream repos, pins"]
+    Common --> Plat["source platform .env<br/>selected by uname"]
+    Plat --> Anchor["anchor VERSIONER_BIN, LOGAMUFFIN_BIN,<br/>RUNNER_SPAWNER_BIN, BARNACLE_BIN"]
+    Anchor --> Out["absolute *_BIN for child processes"]
+    click Env href "entry.sh.md"
+```
+
 `scripts/env.sh` is the plumbing that makes the pinned helper tools
 resolvable from any script, in any working directory, on every supported
 platform. It is sourced — never executed — and it works from both bash and
@@ -41,14 +51,14 @@ is documented here:
   It also carries `VERSIONER_TAG_PATTERN=v[0-9]*` and
   `VERSIONER_CONFIG_FILE=.versioner.json`. Note that
   `VERSIONER_TAG_PATTERN` is a variable the `versioner` binary itself
-  honours (see [../config.md](../config.md)) — its pinned value matches the
+  honours (see [../config.go.md](../config.go.md)) — its pinned value matches the
   binary's built-in default. `VERSIONER_REPO`/`VERSIONER_CONFIG_FILE` are
   pin metadata; the binary does not read them (it reads `VERSIONER_CONFIG`).
 
   **The versioner pin is dangling by design.** This repository _is_
   versioner: `tools/versioner/` does not exist, and every platform file
   sets `VERSIONER_BIN=""` (with a comment saying so).
-  [version.md](version.md) therefore falls back to `go run .` when
+  [version.sh.md](version.sh.md) therefore falls back to `go run .` when
   `VERSIONER_BIN` is unset or not executable.
 
 - **`.<platform>.env`** — one per supported platform, same six names as
@@ -65,12 +75,12 @@ environment of any child process — including `versioner` invocations.
 
 ## Related pages
 
-- [entry.md](entry.md) — the entry point most scripts source (loads this
+- [entry.sh.md](entry.sh.md) — the entry point most scripts source (loads this
   file and defines `log()`)
-- [docs.md](docs.md) — the docs generator that resolves `BARNACLE_BIN`
+- [docs.sh.md](docs.sh.md) — the docs generator that resolves `BARNACLE_BIN`
   through this cascade
 - `tools/README.md` — the bundles selected by the `*_BIN` variables
   (source page; `tools/` is excluded from the barnacle scan, so it is not
   rendered)
-- [../config.md](../config.md) — the `VERSIONER_*` variables the binary
+- [../config.go.md](../config.go.md) — the `VERSIONER_*` variables the binary
   itself honours
