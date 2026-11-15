@@ -49,6 +49,8 @@ Go dependencies.
 - `.versioner.json` — this repo's own configuration (`main` → `0`).
 - `README.md` — user-facing docs. Keep flag/env/config tables in sync with
   `main.go` and `config.go`.
+- `*.md` siblings of the above (and of every script) — the barnacle
+  documentation pages; see "Documentation files (barnacle)" below.
 
 ## Invariants — do not change casually
 
@@ -100,6 +102,7 @@ go test ./...       # must pass; add coverage for new pure logic
 make build          # ./versioner
 make cross          # ./dist/ binaries for 5 targets
 ./scripts/release.sh --dry-run   # preview dogfooding release (no tag/push)
+./scripts/docs.sh                # regenerate the documentation site into ./site/
 ./format.bash                   # format in place (formattington via uv)
 ./ci/format_check.bash          # CI formatting gate
 ```
@@ -121,6 +124,64 @@ compute.
 - Error messages go to stderr as `versioner: <message>` with exit `1` for
   compute failures, `2` for bad flags/config. Never print trace lines on
   failure paths.
+
+## Documentation files (barnacle)
+
+The repository's documentation is a set of Markdown (`.md`) and Mermaid
+(`.mmd`) source files rendered into a static site by the pinned
+[barnacle](https://github.com/fordaj/barnacle) binary (`tools/barnacle/`,
+wired into the environment cascade as `BARNACLE_BIN`). Generate the site
+with `scripts/docs.sh`; the output (`./site/`) is git-ignored and never
+committed.
+
+Layout — documentation lives next to the code it describes:
+
+- One sibling `.md` per Go source file at the repo root: `main.go` →
+  `main.md`, `config.go` → `config.md`, `version.go` → `version.md`
+  (test files have no pages), plus `format.bash` → `format.md`.
+- One sibling `.md` per script: `scripts/build.sh` → `build.md`,
+  `scripts/docs.sh` → `docs.md`, `scripts/entry.sh` → `entry.md`,
+  `scripts/env.sh` → `env.md`, `scripts/release.sh` → `release.md`,
+  `scripts/version.bash` → `version.md`, plus `scripts/README.md` as the
+  hub.
+- One sibling `.md` per bundle in `tools/` (`tools/<name>/update.bash` →
+  `tools/<name>/update.md`: `barnacle`, `formattington-lite`,
+  `logamuffin`, `runner-spawner`), plus `tools/README.md` as the hub.
+  `.barnacle.json` excludes `tools/` from the scan, so these pages are
+  source-only (never rendered); reference them by path in code spans —
+  do not link to them from rendered pages (barnacle would emit dead
+  `.html` hrefs).
+- Root `README.md`, this file, and `scripts/README.md` / `tools/README.md`
+  act as entry points; `ci/`, `Makefile`, `go.mod`, `.versioner.json`,
+  `pyproject.toml`, and the lock files have no sibling pages.
+
+Rules for keeping these files current:
+
+- When you add, rename, remove, or repurpose a documented file — a Go
+  file, a script, or a bundle — update its sibling `.md` **in the same
+  change**. A new file without its page is incomplete work; a stale page
+  is worse than none.
+- Source every fact: the `.go`/`.sh`/`.bash` file itself, this file
+  (AGENTS.md), and README.md are the accepted sources. Never invent
+  flags, exit codes, extensions, or bundle-platform matrices.
+- Use plain relative links (`cli.md`, `../README.md`) with the linking
+  file's `.md` path — barnacle rewrites them to `.html`. Do not link to
+  files barnacle does not render (binaries, `.sh`, `LICENSE`, and — in
+  this repo — anything under `tools/`); link the related `.md` page
+  instead (for external references, a full `https://` URL is fine).
+- A `foo.md` and a `foo.mmd` may not coexist for the same stem —
+  barnacle fails the whole site rather than overwriting.
+- Hub pages (`README.md` in each documented directory) list their
+  siblings; adding a page means linking it from the hub too.
+- Barnacle skips hidden files by default, so the `.common.env` and
+  `.<platform>.env` cascade is documented inside `scripts/env.md` —
+  keep it accurate there instead of adding hidden doc files.
+- Regenerate and self-review the site before publishing:
+  `scripts/docs.sh`, then click through the changed pages. The
+  generator output must remain free of broken local links.
+
+Definition of Done addition: a change that touches any documented file
+updates (or creates) its sibling page in the same commit.
 
 ## Parity checking (shell vs Go)
 

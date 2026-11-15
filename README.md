@@ -306,6 +306,13 @@ Released binaries are verified and refreshed with the `tools/*/update.bash`
 scripts; archives are platform-native (`.tar.gz` on macOS/Linux, `.zip` on
 Windows).
 
+## Documentation
+
+The repository documents itself with sibling `.md` pages next to the code
+(see `AGENTS.md`, "Documentation files (barnacle)"). Generate the static
+site with `scripts/docs.sh` (output: `./site/`, git-ignored); the rules
+for keeping the pages current live in `AGENTS.md` and `scripts/docs.md`.
+
 ## Formatting and CI
 
 Formatting is orchestrated by [formattington](https://github.com/fordaj/formattington) via `uv` (Python tooling pinned in `pyproject.toml`/`uv.lock`):
