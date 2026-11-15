@@ -28,6 +28,7 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+          cache: false
 
       # goimports via `go install` (lands in $(go env GOPATH)/bin).
       - name: Install goimports
@@ -98,6 +99,7 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+          cache: false
       - run: go vet ./...
       - run: gofmt -l . && test -z "$(gofmt -l .)"
       - run: go test ./...
