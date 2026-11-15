@@ -11,8 +11,9 @@ VERSION = <branch-version>.<major>.<minor>.<revision>.<patch>
 TAG     = "v" + VERSION
 ```
 
-from git history. It is the Go replacement for the legacy `get_version.sh`
-(kept in the repo root for reference/fallback only — do not extend it).
+from git history. It is the Go replacement for a legacy shell script
+(`get_version.sh`); that script is **not** in this repository — `versioner`
+is the canonical implementation.
 
 The binary is meant to be cross-compiled (`CGO_ENABLED=0`) and dropped into
 git-based software projects. It shells out to `git` but has no third-party
@@ -28,20 +29,31 @@ Go dependencies.
   `ApplyBump`), git plumbing via a stubbable `gitRun` func var, `Compute`.
 - `*_test.go` — table/'stubbed-git' unit tests.
 - `Makefile` — `build`/`test`/`vet`/`cross`/`clean`.
-- `release.bash` — dogfooding release: builds `versioner`, computes
+- `scripts/release.sh` — dogfooding release: builds `versioner`, computes
   `TAG`, runs `make cross` with `VERSION=$TAG` to
   `dist/<arch>/versioner[.exe]`, packs each into
-  `dist/Versioner_<tag>_<arch>.7z` with README/LICENSE/example config,
-  tags/pushes, and `gh release create`s the `.7z` archives + checksums
-  (`--dry-run` to preview).
-- `versioner.example.json` — copy to `.versioner.json` to configure a project.
+  `dist/Versioner_<tag>_<arch>.tar.gz` (`.zip` on Windows) with
+  README/LICENSE, tags/pushes, and `gh release create`s the archives +
+  `checksums.txt` (`--dry-run` to preview). There is no 7zip anywhere.
+- `scripts/` — the env cascade (`env.sh`, `entry.sh`, `.common.env`,
+  `.<platform>.env`), `version.bash`, `build.sh`, `docs.sh`.
+- `tools/` — bundled binaries from the sibling `fordaj/*` repos
+  (`barnacle`, `formattington-lite`, `logamuffin`, `runner-spawner`)
+  with one `update.bash` per tool refreshing them from the upstream
+  GitHub releases (platform-native `.tar.gz`/`.zip` assets; legacy `.7z`
+  still accepted). `scripts/entry.sh` exposes `log()` (logamuffin-backed).
+- `.formattington.json` — formatting configuration (formattington); the
+  repo formats itself with it via `./format.bash` / `./ci/format_check.bash`.
+- `.runner-spawner.json` — self-hosted runner provisioning for this repo
+  (consumed by `runner-spawner create`).
+- `.versioner.json` — this repo's own configuration (`main` → `0`).
 - `README.md` — user-facing docs. Keep flag/env/config tables in sync with
   `main.go` and `config.go`.
 
 ## Invariants — do not change casually
 
-These mirror `get_version.sh` exactly; changing them breaks parity and
-every project that depends on the version numbers.
+These mirror the legacy shell script exactly; changing them breaks parity
+and every project that depends on the version numbers.
 
 1. **Base from the tag.** `git describe --tags --abbrev=0 --match <pattern>`
    (default `v[0-9]*`). Seed `major/minor/revision` from the tag's
@@ -52,9 +64,9 @@ every project that depends on the version numbers.
    untagged) oldest-first; every commit bumps `patch`.
 3. **Conventional prefixes (case-insensitive, before the first `:`):**
    breaking (`feat!`/`feature!`/`fix!`, with optional `(scope)`) ⇒ `major++`
-   + reset `minor`/`revision`; `feat`/`feature` ⇒ `minor++` + reset
-   `revision`; `fix` ⇒ `revision++`. Unrecognised types (and breaking
-   unrecognised types) bump `patch` only.
+   - reset `minor`/`revision`; `feat`/`feature` ⇒ `minor++` + reset
+     `revision`; `fix` ⇒ `revision++`. Unrecognised types (and breaking
+     unrecognised types) bump `patch` only.
 4. **Branch version.** Exempt branch ⇒ its value, else default `254`
    (including detached `HEAD`). `Compute` resolves branch before replay.
 5. **Text output is a compatibility surface.** Default `text` format prints
@@ -87,8 +99,16 @@ go vet ./...        # must pass
 go test ./...       # must pass; add coverage for new pure logic
 make build          # ./versioner
 make cross          # ./dist/ binaries for 5 targets
-./release.bash --dry-run  # preview dogfooding release (no tag/push)
+./scripts/release.sh --dry-run   # preview dogfooding release (no tag/push)
+./format.bash                   # format in place (formattington via uv)
+./ci/format_check.bash          # CI formatting gate
 ```
+
+CI (`.github/workflows/ci.yml`) runs on self-hosted macOS and Windows runners
+(managed by `tools/runner-spawner/` per the committed `.runner-spawner.json`):
+Check Formatting (`./ci/format_check.bash`) and Test (`go vet ./...`, `gofmt`
+check, `go test ./...`, `go build ./...`). There is no GitHub-hosted Linux
+compute.
 
 - Use `gofmt`; run `go vet`/`go test` before finishing any change.
 - Pure logic (parsing, bumping, config overlay) should stay pure and
@@ -104,22 +124,12 @@ make cross          # ./dist/ binaries for 5 targets
 
 ## Parity checking (shell vs Go)
 
-When changing version rules, verify against the legacy script in scratch
-repos (not this repo). Example:
-
-```sh
-export GO_BIN=/tmp/versioner  # from `make build` -> ./versioner
-go build -o $GO_BIN .
-TMPD=$(mktemp -d /tmp/ve.XXXXXX); mkdir -p $TMPD/repo
-cp get_version.sh $TMPD/
-printf 'declare -A EXEMPT_BRANCHES=([main]=1)\n' > $TMPD/env.sh
-git -C $TMPD/repo init -b main -q
-git -C $TMPD/repo config user.email a@example.com; git -C $TMPD/repo config user.name t
-# ... commit some feat:/fix:/feat!: subjects, optionally git tag v1.0.0.0.1 ...
-(cd $TMPD/repo && bash $TMPD/get_version.sh) > $TMPD/shell.out
-$GO_BIN --repo-dir $TMPD/repo --exempt-branch main=1 > $TMPD/go.out
-diff $TMPD/shell.out $TMPD/go.out   # must be identical
-```
+The legacy shell script is not in this repo. When changing version rules,
+write scratch git repositories (`mktemp -d`) and assert `versioner`'s output
+directly (`--quiet`, `--format json`) against the documented scheme above;
+table-driven tests in `version_test.go`/`config_test.go` are the primary
+guard. The rule semantics must not change without updating `README.md` and
+this file.
 
 ## Conventions
 

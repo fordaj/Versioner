@@ -22,7 +22,7 @@ run: build
 
 install:
 	CGO_ENABLED=0 go build $(LDFLAGS) -o $(BIN) .
-	cp $(BIN) "$(GOPATH)/bin/versioner" 2>/dev/null || cp $(BIN) /usr/local/bin/versioner
+	@GOBIN="$$($(GO) env GOPATH)/bin"; mkdir -p "$$GOBIN" && cp $(BIN) "$$GOBIN/versioner" || cp $(BIN) /usr/local/bin/versioner
 
 cross:
 	mkdir -p $(DIST)

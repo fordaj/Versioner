@@ -1,0 +1,8 @@
+{
+  "owner": "fordaj",
+  "repo": "runner-spawner",
+  "runnerNames": ["runner01"],
+  "runnersDir": ".runners",
+  "runnerGroup": "Default",
+  "runnerVersion": "2.338.2"
+}

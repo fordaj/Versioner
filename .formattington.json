@@ -1,0 +1,9 @@
+{
+  "commands": [
+    ["prettier"],
+    ["gofmt"],
+    ["goimports"],
+    ["shfmt", "-i", "2"],
+    ["taplo"]
+  ]
+}

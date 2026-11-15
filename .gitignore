@@ -8,6 +8,8 @@
 *.so
 *.dylib
 *.DS_Store
+# ... except bundled tools binaries
+!tools/**/*.exe
 
 # Test binary, built with `go test -c`
 *.test
@@ -36,3 +38,12 @@ go.work.sum
 # Local build outputs (binaries are built or fetched, never committed)
 /versioner
 /dist/
+
+# Python tooling (uv / formattington)
+.venv/
+
+# Self-hosted runners (.runner-spawner.json)
+.runners/
+
+# Logs
+.logs/

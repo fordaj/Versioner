@@ -1,0 +1,14 @@
+[project]
+name = "versioner-tools"
+version = "0.1.0"
+description = "Tooling-only project for versioner formatting (formattington)"
+requires-python = ">=3.14"
+# Pinned to a formattington commit (no PyPI release exists yet).
+# To bump: update the SHA below, then run `uv lock` and `uv sync`.
+dependencies = [
+  "formattington @ git+https://github.com/fordaj/formattington.git@dbed7479da27bd9908fbd7e39c66cb84ab7d7aab",
+]
+
+# This project holds formatting tooling only; it is not a published package.
+[tool.uv]
+package = false
