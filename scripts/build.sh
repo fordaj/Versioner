@@ -6,7 +6,7 @@
 #
 # Writes dist/<platform>/versioner (versioner.exe on Windows) for each
 # target platform, using the version computed by versioner (see
-# scripts/version.bash) stamped into the binary via -ldflags.
+# scripts/version.sh) stamped into the binary via -ldflags.
 #
 # Environment:
 #   VERSION   Override the version string embedded in the binaries.
@@ -21,7 +21,7 @@ REPO_ROOT="$REPO_ROOT_DIR"
 cd "$REPO_ROOT"
 
 if [[ -z "${VERSION:-}" ]]; then
-  eval "$("$ENTRY_DIR/version.bash" --format shell)"
+  eval "$("$ENTRY_DIR/version.sh" --format shell)"
 fi
 log INFO "building versioner $VERSION"
 

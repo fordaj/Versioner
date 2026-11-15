@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# update.bash — refresh bundled barnacle binaries from fordaj/barnacle releases.
+# update.sh — refresh bundled runner-spawner binaries from fordaj/runner-spawner releases.
 #
 # Downloads the latest release's per-platform executables via gh, verifies
 # SHA256 checksums when the release ships them, extracts each binary into
-# tools/barnacle/<tag>/<platform>/ (platform is the bundled <os>-<arch> layout:
+# tools/runner-spawner/<tag>/<platform>/ (platform is the bundled <os>-<arch> layout:
 # macos/linux/windows + x86_64/arm64, so darwin-amd64 -> macos-x86_64, etc.),
 # and deletes old version folders. Old v*/ folders are deleted only after the
 # new version is fully staged, so a failed download leaves the previous
@@ -15,9 +15,9 @@
 # cut before the format change; new releases do not need p7zip at all.
 #
 # Usage:
-#   tools/barnacle/update.bash              # download latest, replace old versions
-#   tools/barnacle/update.bash --dry-run    # resolve tag + list assets, change nothing
-#   tools/barnacle/update.bash --help       # usage
+#   tools/runner-spawner/update.sh              # download latest, replace old versions
+#   tools/runner-spawner/update.sh --dry-run    # resolve tag + list assets, change nothing
+#   tools/runner-spawner/update.sh --help       # usage
 #
 # Prerequisites: gh (https://cli.github.com/) and tar/unzip (.7z assets
 # additionally need 7z/7zz). The script resolves its own directory, so it can
@@ -25,52 +25,52 @@
 # scripts/entry.sh (logamuffin, with printf fallback).
 #
 # Layout after a successful run (example for v0.1.2.3):
-#   tools/barnacle/
-#     update.bash
+#   tools/runner-spawner/
+#     update.sh
 #     v0.1.2.3/
-#       macos-arm64/barnacle
-#       macos-x86_64/barnacle
-#       linux-arm64/barnacle
-#       linux-x86_64/barnacle
-#       windows-x86_64/barnacle
+#       macos-arm64/runner-spawner
+#       macos-x86_64/runner-spawner
+#       linux-arm64/runner-spawner
+#       linux-x86_64/runner-spawner
+#       windows-x86_64/runner-spawner
 #
 # Env:
-#   BARNACLE_REPO  Repository slug (default: fordaj/barnacle)
-#   BARNACLE_TAG   Pinned tag (default: latest release)
+#   RUNNER_SPAWNER_TOOL_REPO  Repository slug (default: fordaj/runner-spawner)
+#   RUNNER_SPAWNER_TAG   Pinned tag (default: latest release)
 
 set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 REPO_ROOT_FOR_ENV=$(cd -- "$SCRIPT_DIR/../.." &>/dev/null && pwd)
 if [[ ! -f "$REPO_ROOT_FOR_ENV/scripts/entry.sh" ]]; then
-    printf 'update.bash: error: entry point not found: %s/scripts/entry.sh\n' "$REPO_ROOT_FOR_ENV" >&2
+    printf 'update.sh: error: entry point not found: %s/scripts/entry.sh\n' "$REPO_ROOT_FOR_ENV" >&2
     exit 1
 fi
 # shellcheck disable=SC1091
 . "$REPO_ROOT_FOR_ENV/scripts/entry.sh"
 
 DRY_RUN=0
-TAG="${BARNACLE_TAG:-}"
-REPO="${BARNACLE_REPO:-fordaj/barnacle}"
+TAG="${RUNNER_SPAWNER_TAG:-}"
+REPO="${RUNNER_SPAWNER_TOOL_REPO:-fordaj/runner-spawner}"
 
 usage() {
     cat <<'EOF'
-Usage: tools/barnacle/update.bash [--dry-run] [--tag TAG] [--repo REPO]
+Usage: tools/runner-spawner/update.sh [--dry-run] [--tag TAG] [--repo REPO]
 
-Download the latest barnacle release from GitHub via gh, extract each
-platform binary into tools/barnacle/<tag>/<platform>/ (platform is the
+Download the latest runner-spawner release from GitHub via gh, extract each
+platform binary into tools/runner-spawner/<tag>/<platform>/ (platform is the
 bundled <os>-<arch> layout, e.g. darwin-amd64 -> macos-x86_64), and delete old
-version folders. Only the binary is kept (plus the upstream MIT LICENSE).
+version folders. Only the binary is kept.
 
 Flags:
   --dry-run, -n   Resolve tag + list planned assets, change nothing.
   --tag TAG       Pin a specific release tag (default: latest release).
-  --repo REPO     Repository slug (default: fordaj/barnacle).
+  --repo REPO     Repository slug (default: fordaj/runner-spawner).
   --help, -h      Show this help.
 
 Env:
-  BARNACLE_REPO  Repository slug (overridden by --repo).
-  BARNACLE_TAG   Pinned tag (overridden by --tag).
+  RUNNER_SPAWNER_TOOL_REPO  Repository slug (overridden by --repo).
+  RUNNER_SPAWNER_TAG   Pinned tag (overridden by --tag).
 EOF
 }
 
@@ -135,8 +135,8 @@ need_cmd gh
 need_cmd tar
 
 TOOL_ROOT="$SCRIPT_DIR"
-[[ -d "$TOOL_ROOT" ]] || die "barnacle bundle directory not found: $TOOL_ROOT"
-log INFO "barnacle bundle directory: $TOOL_ROOT"
+[[ -d "$TOOL_ROOT" ]] || die "runner-spawner bundle directory not found: $TOOL_ROOT"
+log INFO "runner-spawner bundle directory: $TOOL_ROOT"
 log INFO "repository: $REPO"
 
 if [[ -z "$TAG" ]]; then
@@ -301,7 +301,7 @@ if [[ -n "$checksums_file" ]]; then
     (cd "$TMP_DIR" && $checksum_tool -c "$verify_list") || die "checksum verification failed for $TAG"
     log INFO "checksums verified"
 else
-    log WARNING "no checksums in $TAG release; skipping verification"
+    die "no checksums.txt/SHA256SUMS.txt in $TAG release; refusing to install unverified binaries"
 fi
 
 # Extract one archive into a destination directory, format-agnostic.
@@ -344,7 +344,7 @@ for archive in "${archives[@]}"; do
     mkdir -p "$extract_dir"
     extract_archive "$archive" "$extract_dir"
     bin_src=""
-    for cand in "$extract_dir/barnacle" "$extract_dir/barnacle.exe"; do
+    for cand in "$extract_dir/runner-spawner" "$extract_dir/runner-spawner.exe"; do
         if [[ -f "$cand" ]]; then
             bin_src="$cand"
             break
@@ -352,25 +352,21 @@ for archive in "${archives[@]}"; do
     done
     if [[ -z "$bin_src" ]]; then
         # Some archives nest everything under a single top-level directory.
-        for cand in "$extract_dir"/*/barnacle "$extract_dir"/*/barnacle.exe; do
+        for cand in "$extract_dir"/*/runner-spawner "$extract_dir"/*/runner-spawner.exe; do
             if [[ -f "$cand" ]]; then
                 bin_src="$cand"
                 break
             fi
         done
     fi
-    [[ -n "$bin_src" ]] || die "no barnacle binary in $base (expected barnacle)"
+    [[ -n "$bin_src" ]] || die "no runner-spawner binary in $base (expected runner-spawner)"
     bin_name="$(basename "$bin_src")"
     target_dir="$STAGE_DIR/$PLATFORM"
     mkdir -p "$target_dir"
     cp -p "$bin_src" "$target_dir/$bin_name"
     chmod +x "$target_dir/$bin_name"
     [[ -s "$target_dir/$bin_name" ]] || die "installed binary is empty: $target_dir/$bin_name"
-    for extra in LICENSE; do
-        if [[ -f "$extract_dir/$extra" ]]; then
-            cp -p "$extract_dir/$extra" "$target_dir/$extra"
-        fi
-    done
+
     log INFO "installed $PLATFORM/$bin_name (from $base)"
     rm -rf -- "$extract_dir"
 done
@@ -406,7 +402,7 @@ arm64 | aarch64) host_arch="arm64" ;;
 esac
 host_platform="$host_os-$host_arch"
 host_bin=""
-for cand in "$TAG_DIR/$host_platform/barnacle" "$TAG_DIR/$host_platform/barnacle.exe"; do
+for cand in "$TAG_DIR/$host_platform/runner-spawner" "$TAG_DIR/$host_platform/runner-spawner.exe"; do
     if [[ -x "$cand" ]]; then
         host_bin="$cand"
     fi
@@ -415,7 +411,7 @@ if [[ -n "$host_bin" ]]; then
     host_ver="$("$host_bin" --version 2>&1 || true)"
     log INFO "host binary $host_platform reports: $host_ver"
     case "$host_ver" in
-    *"$TAG"* | *"${TAG#v}"*) ;;
+    *"$TAG"*) ;;
     *) log WARNING "host binary version '$host_ver' does not contain $TAG" ;;
     esac
 else

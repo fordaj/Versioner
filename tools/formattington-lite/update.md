@@ -6,7 +6,7 @@ formatter executables (the `-full` assets embed them). This bundle pins
 the lite binary for the six supported platforms.
 
 Note: this repository formats itself with formattington via `uv`
-(`format.bash` → `uv run formattington`, pinned in `pyproject.toml`), **not**
+(`format.sh` → `uv run formattington`, pinned in `pyproject.toml`), **not**
 via this bundle — no script here references `tools/formattington-lite/`.
 It is kept in the uniform `tools/` layout alongside the other pinned
 helpers.
@@ -15,7 +15,7 @@ helpers.
 
 ```text
 tools/formattington-lite/
-  update.bash                     # refresh from fordaj/formattington releases
+  update.sh                     # refresh from fordaj/formattington releases
   v0.0.2.0.53/
     macos-arm64/formattington
     macos-x86_64/formattington
@@ -25,7 +25,7 @@ tools/formattington-lite/
     windows-x86_64/formattington.exe
 ```
 
-## `update.bash` in detail
+## `update.sh` in detail
 
 The script downloads the latest (or `--tag`ged) formattington release from
 GitHub via `gh` and stages it into

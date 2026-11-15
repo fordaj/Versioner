@@ -83,7 +83,7 @@ jobs:
         with:
           node-version: 22
 
-      # prettier (pnpm) — matches the PATH-only requirement in format.bash.
+      # prettier (pnpm) — matches the PATH-only requirement in format.sh.
       - name: Install pnpm
         shell: bash
         run: |
@@ -134,7 +134,7 @@ jobs:
       # Requires uv, bash, prettier, shfmt, and goimports (all installed
       # above). Exits non-zero when anything is unformatted.
       - name: Run formattington format check
-        run: ./ci/format_check.bash
+        run: ./ci/format_check.sh
 
   test:
     name: Test (${{ matrix.os }})

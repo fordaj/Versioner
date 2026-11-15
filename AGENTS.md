@@ -36,14 +36,14 @@ Go dependencies.
   README/LICENSE, tags/pushes, and `gh release create`s the archives +
   `checksums.txt` (`--dry-run` to preview). There is no 7zip anywhere.
 - `scripts/` — the env cascade (`env.sh`, `entry.sh`, `.common.env`,
-  `.<platform>.env`), `version.bash`, `build.sh`, `docs.sh`.
+  `.<platform>.env`), `version.sh`, `build.sh`, `docs.sh`.
 - `tools/` — bundled binaries from the sibling `fordaj/*` repos
   (`barnacle`, `formattington-lite`, `logamuffin`, `runner-spawner`)
-  with one `update.bash` per tool refreshing them from the upstream
+  with one `update.sh` per tool refreshing them from the upstream
   GitHub releases (platform-native `.tar.gz`/`.zip` assets; legacy `.7z`
   still accepted). `scripts/entry.sh` exposes `log()` (logamuffin-backed).
 - `.formattington.json` — formatting configuration (formattington); the
-  repo formats itself with it via `./format.bash` / `./ci/format_check.bash`.
+  repo formats itself with it via `./format.sh` / `./ci/format_check.sh`.
 - `.runner-spawner.json` — self-hosted runner provisioning for this repo
   (consumed by `runner-spawner create`).
 - `.versioner.json` — this repo's own configuration (`main` → `0`).
@@ -103,13 +103,13 @@ make build          # ./versioner
 make cross          # ./dist/ binaries for 5 targets
 ./scripts/release.sh --dry-run   # preview dogfooding release (no tag/push)
 ./scripts/docs.sh                # regenerate the documentation site into ./site/
-./format.bash                   # format in place (formattington via uv)
-./ci/format_check.bash          # CI formatting gate
+./format.sh                   # format in place (formattington via uv)
+./ci/format_check.sh          # CI formatting gate
 ```
 
 CI (`.github/workflows/ci.yml`) runs on self-hosted macOS and Windows runners
 (managed by `tools/runner-spawner/` per the committed `.runner-spawner.json`):
-Check Formatting (`./ci/format_check.bash`) and Test (`go vet ./...`, `gofmt`
+Check Formatting (`./ci/format_check.sh`) and Test (`go vet ./...`, `gofmt`
 check, `go test ./...`, `go build ./...`). There is no GitHub-hosted Linux
 compute.
 
@@ -138,13 +138,13 @@ Layout — documentation lives next to the code it describes:
 
 - One sibling `.md` per Go source file at the repo root: `main.go` →
   `main.md`, `config.go` → `config.md`, `version.go` → `version.md`
-  (test files have no pages), plus `format.bash` → `format.md`.
+  (test files have no pages), plus `format.sh` → `format.md`.
 - One sibling `.md` per script: `scripts/build.sh` → `build.md`,
   `scripts/docs.sh` → `docs.md`, `scripts/entry.sh` → `entry.md`,
   `scripts/env.sh` → `env.md`, `scripts/release.sh` → `release.md`,
-  `scripts/version.bash` → `version.md`, plus `scripts/README.md` as the
+  `scripts/version.sh` → `version.md`, plus `scripts/README.md` as the
   hub.
-- One sibling `.md` per bundle in `tools/` (`tools/<name>/update.bash` →
+- One sibling `.md` per bundle in `tools/` (`tools/<name>/update.sh` →
   `tools/<name>/update.md`: `barnacle`, `formattington-lite`,
   `logamuffin`, `runner-spawner`), plus `tools/README.md` as the hub.
   `.barnacle.json` excludes `tools/` from the scan, so these pages are

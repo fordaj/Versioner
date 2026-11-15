@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# update.bash — refresh bundled logamuffin binaries from fordaj/logamuffin releases.
+# update.sh — refresh bundled formattington-lite binaries from fordaj/formattington releases.
 #
 # Downloads the latest release's per-platform executables via gh, verifies
 # SHA256 checksums when the release ships them, extracts each binary into
-# tools/logamuffin/<tag>/<platform>/ (platform is the bundled <os>-<arch> layout:
+# tools/formattington-lite/<tag>/<platform>/ (platform is the bundled <os>-<arch> layout:
 # macos/linux/windows + x86_64/arm64, so darwin-amd64 -> macos-x86_64, etc.),
 # and deletes old version folders. Old v*/ folders are deleted only after the
 # new version is fully staged, so a failed download leaves the previous
@@ -15,9 +15,9 @@
 # cut before the format change; new releases do not need p7zip at all.
 #
 # Usage:
-#   tools/logamuffin/update.bash              # download latest, replace old versions
-#   tools/logamuffin/update.bash --dry-run    # resolve tag + list assets, change nothing
-#   tools/logamuffin/update.bash --help       # usage
+#   tools/formattington-lite/update.sh              # download latest, replace old versions
+#   tools/formattington-lite/update.sh --dry-run    # resolve tag + list assets, change nothing
+#   tools/formattington-lite/update.sh --help       # usage
 #
 # Prerequisites: gh (https://cli.github.com/) and tar/unzip (.7z assets
 # additionally need 7z/7zz). The script resolves its own directory, so it can
@@ -25,52 +25,52 @@
 # scripts/entry.sh (logamuffin, with printf fallback).
 #
 # Layout after a successful run (example for v0.1.2.3):
-#   tools/logamuffin/
-#     update.bash
+#   tools/formattington-lite/
+#     update.sh
 #     v0.1.2.3/
-#       macos-arm64/logamuffin
-#       macos-x86_64/logamuffin
-#       linux-arm64/logamuffin
-#       linux-x86_64/logamuffin
-#       windows-x86_64/logamuffin
+#       macos-arm64/formattington
+#       macos-x86_64/formattington
+#       linux-arm64/formattington
+#       linux-x86_64/formattington
+#       windows-x86_64/formattington
 #
 # Env:
-#   LOGAMUFFIN_REPO  Repository slug (default: fordaj/logamuffin)
-#   LOGAMUFFIN_TAG   Pinned tag (default: latest release)
+#   FORMATTINGTON_REPO  Repository slug (default: fordaj/formattington)
+#   FORMATTINGTON_TAG   Pinned tag (default: latest release)
 
 set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 REPO_ROOT_FOR_ENV=$(cd -- "$SCRIPT_DIR/../.." &>/dev/null && pwd)
 if [[ ! -f "$REPO_ROOT_FOR_ENV/scripts/entry.sh" ]]; then
-    printf 'update.bash: error: entry point not found: %s/scripts/entry.sh\n' "$REPO_ROOT_FOR_ENV" >&2
+    printf 'update.sh: error: entry point not found: %s/scripts/entry.sh\n' "$REPO_ROOT_FOR_ENV" >&2
     exit 1
 fi
 # shellcheck disable=SC1091
 . "$REPO_ROOT_FOR_ENV/scripts/entry.sh"
 
 DRY_RUN=0
-TAG="${LOGAMUFFIN_TAG:-}"
-REPO="${LOGAMUFFIN_REPO:-fordaj/logamuffin}"
+TAG="${FORMATTINGTON_TAG:-}"
+REPO="${FORMATTINGTON_REPO:-fordaj/formattington}"
 
 usage() {
     cat <<'EOF'
-Usage: tools/logamuffin/update.bash [--dry-run] [--tag TAG] [--repo REPO]
+Usage: tools/formattington-lite/update.sh [--dry-run] [--tag TAG] [--repo REPO]
 
-Download the latest logamuffin release from GitHub via gh, extract each
-platform binary into tools/logamuffin/<tag>/<platform>/ (platform is the
+Download the latest formattington-lite release from GitHub via gh, extract each
+platform binary into tools/formattington-lite/<tag>/<platform>/ (platform is the
 bundled <os>-<arch> layout, e.g. darwin-amd64 -> macos-x86_64), and delete old
-version folders. Only the binary is kept.
+version folders. Only the binary is kept, plus NOTICE.md and LICENSES/.
 
 Flags:
   --dry-run, -n   Resolve tag + list planned assets, change nothing.
   --tag TAG       Pin a specific release tag (default: latest release).
-  --repo REPO     Repository slug (default: fordaj/logamuffin).
+  --repo REPO     Repository slug (default: fordaj/formattington).
   --help, -h      Show this help.
 
 Env:
-  LOGAMUFFIN_REPO  Repository slug (overridden by --repo).
-  LOGAMUFFIN_TAG   Pinned tag (overridden by --tag).
+  FORMATTINGTON_REPO  Repository slug (overridden by --repo).
+  FORMATTINGTON_TAG   Pinned tag (overridden by --tag).
 EOF
 }
 
@@ -135,8 +135,8 @@ need_cmd gh
 need_cmd tar
 
 TOOL_ROOT="$SCRIPT_DIR"
-[[ -d "$TOOL_ROOT" ]] || die "logamuffin bundle directory not found: $TOOL_ROOT"
-log INFO "logamuffin bundle directory: $TOOL_ROOT"
+[[ -d "$TOOL_ROOT" ]] || die "formattington-lite bundle directory not found: $TOOL_ROOT"
+log INFO "formattington-lite bundle directory: $TOOL_ROOT"
 log INFO "repository: $REPO"
 
 if [[ -z "$TAG" ]]; then
@@ -203,8 +203,8 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
         case "$asset" in
         *.tar.gz | *.zip | *.7z)
             stem="$(strip_archive_ext "$asset")"
-            if [[ "" != "" && "$stem" != *"" ]]; then
-                log INFO "  $asset (ignored: not a  archive)"
+            if [[ "-lite" != "" && "$stem" != *"-lite" ]]; then
+                log INFO "  $asset (ignored: not a -lite archive)"
                 continue
             fi
             asset_count=$((asset_count + 1))
@@ -264,7 +264,7 @@ archives=()
 for archive in "$TMP_DIR"/*.tar.gz "$TMP_DIR"/*.zip "$TMP_DIR"/*.7z; do
     [[ -e "$archive" ]] || continue
     stem="$(strip_archive_ext "$(basename "$archive")")"
-    if [[ "" != "" && "$stem" != *"" ]]; then
+    if [[ "-lite" != "" && "$stem" != *"-lite" ]]; then
         continue
     fi
     archives+=("$archive")
@@ -344,7 +344,7 @@ for archive in "${archives[@]}"; do
     mkdir -p "$extract_dir"
     extract_archive "$archive" "$extract_dir"
     bin_src=""
-    for cand in "$extract_dir/logamuffin" "$extract_dir/logamuffin.exe"; do
+    for cand in "$extract_dir/formattington" "$extract_dir/formattington.exe"; do
         if [[ -f "$cand" ]]; then
             bin_src="$cand"
             break
@@ -352,21 +352,25 @@ for archive in "${archives[@]}"; do
     done
     if [[ -z "$bin_src" ]]; then
         # Some archives nest everything under a single top-level directory.
-        for cand in "$extract_dir"/*/logamuffin "$extract_dir"/*/logamuffin.exe; do
+        for cand in "$extract_dir"/*/formattington "$extract_dir"/*/formattington.exe; do
             if [[ -f "$cand" ]]; then
                 bin_src="$cand"
                 break
             fi
         done
     fi
-    [[ -n "$bin_src" ]] || die "no logamuffin binary in $base (expected logamuffin)"
+    [[ -n "$bin_src" ]] || die "no formattington binary in $base (expected formattington)"
     bin_name="$(basename "$bin_src")"
     target_dir="$STAGE_DIR/$PLATFORM"
     mkdir -p "$target_dir"
     cp -p "$bin_src" "$target_dir/$bin_name"
     chmod +x "$target_dir/$bin_name"
     [[ -s "$target_dir/$bin_name" ]] || die "installed binary is empty: $target_dir/$bin_name"
-
+    for extra in NOTICE.md "LICENSES"; do
+        if [[ -e "$extract_dir/$extra" ]]; then
+            cp -pr "$extract_dir/$extra" "$target_dir/"
+        fi
+    done
     log INFO "installed $PLATFORM/$bin_name (from $base)"
     rm -rf -- "$extract_dir"
 done
@@ -402,7 +406,7 @@ arm64 | aarch64) host_arch="arm64" ;;
 esac
 host_platform="$host_os-$host_arch"
 host_bin=""
-for cand in "$TAG_DIR/$host_platform/logamuffin" "$TAG_DIR/$host_platform/logamuffin.exe"; do
+for cand in "$TAG_DIR/$host_platform/formattington" "$TAG_DIR/$host_platform/formattington.exe"; do
     if [[ -x "$cand" ]]; then
         host_bin="$cand"
     fi
@@ -411,7 +415,7 @@ if [[ -n "$host_bin" ]]; then
     host_ver="$("$host_bin" --version 2>&1 || true)"
     log INFO "host binary $host_platform reports: $host_ver"
     case "$host_ver" in
-    *"$TAG"*) ;;
+    *"$TAG"* | *"${TAG#v}"*) ;;
     *) log WARNING "host binary version '$host_ver' does not contain $TAG" ;;
     esac
 else

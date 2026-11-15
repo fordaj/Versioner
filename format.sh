@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Format the versioner repository in place with formattington.
 #
-#   ./format.bash              # format all matching files in place
-#   ./format.bash --series     # format sequentially (ordered output)
-#   ./format.bash --verbose    # show which formatter executables were resolved
+#   ./format.sh              # format all matching files in place
+#   ./format.sh --series     # format sequentially (ordered output)
+#   ./format.sh --verbose    # show which formatter executables were resolved
 #
 # Formattington (https://github.com/fordaj/formattington) is pinned in
 # pyproject.toml (git commit) and locked in uv.lock. This project uses
@@ -28,7 +28,7 @@
 # locations).
 #
 # To check formatting without modifying files (CI):
-#   ./ci/format_check.bash
+#   ./ci/format_check.sh
 #
 # Extra flags are forwarded to `formattington` before `all`
 # (e.g. --series, --verbose). --config is managed here; do not pass it.

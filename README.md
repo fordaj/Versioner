@@ -288,21 +288,21 @@ TAG := $(shell ./versioner --quiet | sed -n 's/^TAG=//p')
 main.go, version.go, config.go   the versioner CLI (this repository)
 Makefile                         build/test/vet/cross helpers
 scripts/                         env cascade (env.sh, entry.sh, .common.env,
-                                 .<platform>.env), version.bash, build.sh,
+                                 .<platform>.env), version.sh, build.sh,
                                  release.sh, docs.sh
 tools/                           bundled binaries from sibling fordaj/* repos
                                  (barnacle, formattington-lite, logamuffin,
-                                 runner-spawner) + their update.bash refreshers
+                                 runner-spawner) + their update.sh refreshers
 .formattington.json              formatting configuration (formattington)
 .versioner.json                  versioner's own configuration (main = 0)
 .runner-spawner.json             self-hosted runner provisioning for this repo
 ```
 
 The `tools/` bundles provide logging (logamuffin, via `scripts/entry.sh`),
-version stamping for builds (`scripts/version.bash`, `scripts/build.sh`),
+version stamping for builds (`scripts/version.sh`, `scripts/build.sh`),
 docs-site generation (barnacle, via `scripts/docs.sh`), formatting
 (formattington), and self-hosted CI runner provisioning (runner-spawner).
-Released binaries are verified and refreshed with the `tools/*/update.bash`
+Released binaries are verified and refreshed with the `tools/*/update.sh`
 scripts; archives are platform-native (`.tar.gz` on macOS/Linux, `.zip` on
 Windows).
 
@@ -318,12 +318,12 @@ for keeping the pages current live in `AGENTS.md` and `scripts/docs.md`.
 Formatting is orchestrated by [formattington](https://github.com/fordaj/formattington) via `uv` (Python tooling pinned in `pyproject.toml`/`uv.lock`):
 
 ```sh
-./format.bash            # format in place (prettier, gofmt, goimports, shfmt -i 2, taplo)
-./ci/format_check.bash   # CI check: exit 1 if anything needs formatting
+./format.sh            # format in place (prettier, gofmt, goimports, shfmt -i 2, taplo)
+./ci/format_check.sh   # CI check: exit 1 if anything needs formatting
 ```
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on the repo's self-hosted
-macOS and Windows runners: a formatting check (`./ci/format_check.bash`)
+macOS and Windows runners: a formatting check (`./ci/format_check.sh`)
 plus `go vet ./...`, a `gofmt` verification, `go test ./...` and
 `go build ./...`. Runners are managed with
 [runner-spawner](https://github.com/fordaj/runner-spawner) (see

@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-# version.bash - print the version of the repository.
+# version.sh - print the version of the repository.
 #
 # The version is computed by versioner (see tools/versioner and
 # .versioner.json), so the version of a build and the version of a release
 # can never drift apart.
 #
 # Usage:
-#   scripts/version.bash                 # prints "VERSION=<v>" and "TAG=<t>"
-#   scripts/version.bash --format shell  # prints "export VERSION=..." lines
-#   scripts/version.bash --format json   # prints the raw versioner json
+#   scripts/version.sh                 # prints "VERSION=<v>" and "TAG=<t>"
+#   scripts/version.sh --format shell  # prints "export VERSION=..." lines
+#   scripts/version.sh --format json   # prints the raw versioner json
 #
 # Environment:
 #   VERSIONER_BIN        Path to the versioner binary. This repository IS
@@ -40,7 +40,7 @@ while [[ $# -gt 0 ]]; do
     ;;
   --help | -h)
     cat <<'EOF'
-Usage: scripts/version.bash [--format text|shell|json]
+Usage: scripts/version.sh [--format text|shell|json]
 
 Print the version of the repository computed by versioner.
 

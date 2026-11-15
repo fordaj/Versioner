@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Check formatting without modifying files (for CI).
 #
-#   ./ci/format_check.bash              # exit 1 if anything needs formatting
-#   ./ci/format_check.bash --series     # check sequentially (ordered output)
-#   ./ci/format_check.bash --verbose    # show which formatter executables were resolved
+#   ./ci/format_check.sh              # exit 1 if anything needs formatting
+#   ./ci/format_check.sh --series     # check sequentially (ordered output)
+#   ./ci/format_check.sh --verbose    # show which formatter executables were resolved
 #
-# This is the check-only counterpart of ./format.bash: it runs the same
+# This is the check-only counterpart of ./format.sh: it runs the same
 # formattington configuration (.formattington.json) with --check, so it
-# never rewrites files. See ./format.bash for scope, prerequisites, and
+# never rewrites files. See ./format.sh for scope, prerequisites, and
 # version-pinning details.
 #
 # Exit codes (formattington): 0 = clean, 1 = formatting required,

@@ -3,14 +3,14 @@
 [Logamuffin](https://github.com/fordaj/logamuffin) is the structured
 logging backend for the `log()` function defined in
 [`scripts/entry.sh`](../../scripts/entry.md). Every script in `scripts/`
-and every `tools/<name>/update.bash` logs through it (with a printf
+and every `tools/<name>/update.sh` logs through it (with a printf
 fallback when the binary is absent).
 
 ## Layout
 
 ```text
 tools/logamuffin/
-  update.bash                     # refresh from fordaj/logamuffin releases
+  update.sh                     # refresh from fordaj/logamuffin releases
   v0.1.3.0.35/
     macos-arm64/logamuffin
     macos-x86_64/logamuffin
@@ -20,7 +20,7 @@ tools/logamuffin/
     windows-x86_64/logamuffin.exe
 ```
 
-## `update.bash` in detail
+## `update.sh` in detail
 
 The script downloads the latest (or `--tag`ged) logamuffin release from
 GitHub via `gh` and stages it into `tools/logamuffin/v<tag>/<platform>/`.

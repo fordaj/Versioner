@@ -1,8 +1,8 @@
-# The format driver (`format.bash`)
+# The format driver (`format.sh`)
 
-`format.bash` formats this repository in place using
+`format.sh` formats this repository in place using
 [formattington](https://github.com/fordaj/formattington). It is the local
-counterpart to the CI formatting gate (`ci/format_check.bash`, which exits
+counterpart to the CI formatting gate (`ci/format_check.sh`, which exits
 non-zero when anything needs formatting).
 
 ## What it does
@@ -38,9 +38,9 @@ generated locations.
 
 ## Where it is used
 
-- Locally: `./format.bash` (see `AGENTS.md` and the README "Formatting
+- Locally: `./format.sh` (see `AGENTS.md` and the README "Formatting
 and CI" section).
-- CI: `.github/workflows/ci.yml` runs `ci/format_check.bash` (not this
+- CI: `.github/workflows/ci.yml` runs `ci/format_check.sh` (not this
   script) as the Check Formatting job.
 
 ## Related pages

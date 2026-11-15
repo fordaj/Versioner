@@ -8,7 +8,7 @@ locally computed version into the binaries.
 1. Sources [entry.md](entry.md) (`"$ENTRY_DIR/entry.sh"`) for the
    [env cascade](env.md) and `log()`, then `cd`s to the repository root.
 2. Computes `VERSION`: from the environment if `VERSION` is set, otherwise
-   by `eval`ing `scripts/version.bash --format shell`.
+   by `eval`ing `scripts/version.sh --format shell`.
 3. Requires `go` on `PATH` (fails with `log ERROR` and exit `1` otherwise).
 4. Builds with `CGO_ENABLED=0`, `-trimpath`, and
    `-ldflags "-s -w -X main.toolVersion=$VERSION"` into

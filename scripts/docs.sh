@@ -5,7 +5,7 @@
 # Mermaid files scattered through the repository into a static, navigable
 # HTML site. This script runs the bundled binary from
 # tools/barnacle/v<version>/<platform>/ (refresh with
-# tools/barnacle/update.bash; resolved via scripts/entry.sh) against the
+# tools/barnacle/update.sh; resolved via scripts/entry.sh) against the
 # repository root, so ./site is generated next to .formattington.json.
 #
 # The generated site is written to ./site by default (git-ignored). Any
@@ -50,17 +50,17 @@ Environment:
                  tools/barnacle/v<version>/<platform>/, resolved via
                  scripts/entry.sh).
 
-The bundled binaries are refreshed with tools/barnacle/update.bash.
+The bundled binaries are refreshed with tools/barnacle/update.sh.
 EOF
   exit 0
 fi
 
 if [[ -z "${BARNACLE_BIN:-}" ]]; then
-  log ERROR "no barnacle binary found (run tools/barnacle/update.bash, or set BARNACLE_BIN)"
+  log ERROR "no barnacle binary found (run tools/barnacle/update.sh, or set BARNACLE_BIN)"
   exit 1
 fi
 [[ -x "$BARNACLE_BIN" ]] || {
-  log ERROR "BARNACLE_BIN=$BARNACLE_BIN is not executable (run tools/barnacle/update.bash, or set BARNACLE_BIN)"
+  log ERROR "BARNACLE_BIN=$BARNACLE_BIN is not executable (run tools/barnacle/update.sh, or set BARNACLE_BIN)"
   exit 1
 }
 log INFO "using barnacle: $BARNACLE_BIN"

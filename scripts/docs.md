@@ -1,7 +1,7 @@
 # The docs generator (`scripts/docs.sh`)
 
 Generates the documentation site you are reading: it runs the pinned
-barnacle binary (`tools/barnacle/update.bash` refreshes it; the bundle is
+barnacle binary (`tools/barnacle/update.sh` refreshes it; the bundle is
 documented in `tools/barnacle/update.md`) against this repository.
 
 Barnacle scans the working tree for Markdown (`.md`) and Mermaid (`.mmd`)
@@ -28,7 +28,7 @@ The script resolves the repository root from its own path, requires
 exit `1` otherwise), and sources it. `BARNACLE_BIN` comes from the
 [cascade](env.md) (`tools/barnacle/v<version>/<platform>/barnacle[.exe]`);
 if unset or not executable, the script fails with instructions to run
-`tools/barnacle/update.bash` (or set `BARNACLE_BIN` explicitly). It then
+`tools/barnacle/update.sh` (or set `BARNACLE_BIN` explicitly). It then
 runs barnacle with the repository root as cwd, so barnacle's
 auto-discovered `./.barnacle.json` and default `./site/` output land at
 the repository root regardless of the caller's cwd.

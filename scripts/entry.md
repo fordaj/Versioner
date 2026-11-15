@@ -7,7 +7,7 @@ cascade files, because it does two jobs at once:
 1. **It loads the environment** — it sources [env.md](env.md) via
    `$ENTRY_DIR/env.sh`.
 2. **It defines `log()`** — the shared logging function used by every
-   script here and by the `tools/<name>/update.bash` refreshers.
+   script here and by the `tools/<name>/update.sh` refreshers.
 
 ## `log()` semantics
 

@@ -24,7 +24,7 @@ Vernacular used in the headers (`log INFO`, `$REPO_ROOT_DIR`,
 
 ## Task scripts
 
-- [version.bash](version.md) — print the repository version computed by
+- [version.sh](version.md) — print the repository version computed by
   versioner (`--format text|shell|json`).
 - [build.sh](build.md) — cross-compile versioner into `dist/` with the
   version stamped in via `-ldflags`.

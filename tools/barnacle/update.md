@@ -9,7 +9,7 @@ repository into a static, navigable HTML site. Versioner uses it to render
 
 ```text
 tools/barnacle/
-  update.bash                     # refresh from fordaj/barnacle releases
+  update.sh                     # refresh from fordaj/barnacle releases
   v0.0.1.0.5/
     macos-arm64/barnacle
     macos-x86_64/barnacle
@@ -19,7 +19,7 @@ tools/barnacle/
     windows-x86_64/barnacle.exe
 ```
 
-## `update.bash` in detail
+## `update.sh` in detail
 
 The script downloads the latest (or `--tag`ged) barnacle release from
 GitHub via `gh` and stages it into `tools/barnacle/v<tag>/<platform>/`.
