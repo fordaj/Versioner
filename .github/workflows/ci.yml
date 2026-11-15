@@ -95,6 +95,7 @@ jobs:
           set -euo pipefail
           PNPM_HOME="$HOME/pnpm"
           mkdir -p "$PNPM_HOME"
+          export PATH="$PNPM_HOME:$PATH"
           pnpm config set global-bin-dir "$PNPM_HOME"
           pnpm add --global prettier
           echo "$PNPM_HOME" >> "$GITHUB_PATH"
