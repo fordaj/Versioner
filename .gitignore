@@ -47,3 +47,6 @@ go.work.sum
 
 # Logs
 .logs/
+
+# Git worktrees
+.worktrees/
