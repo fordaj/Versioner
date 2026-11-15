@@ -11,8 +11,9 @@ VERSION = <branch-version>.<major>.<minor>.<revision>.<patch>
 TAG     = "v" + VERSION
 ```
 
-The legacy `get_version.sh` is kept in the repo root as a reference and
-fallback only. New usage should use the `versioner` binary.
+There is no legacy script in this repository; the `versioner` binary is the
+canonical implementation. (Sibling projects reference `get_version.sh` in
+documentation history — that shell script predates this Go rewrite.)
 
 ## Version scheme
 
@@ -72,44 +73,44 @@ GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -o dist/linux-amd64/ver
 
 ## Releases
 
-`release.bash` cuts a release by **dogfooding** `versioner`: it builds
+`scripts/release.sh` cuts a release by **dogfooding** `versioner`: it builds
 `versioner` from source, uses it to compute the next `VERSION`/`TAG`,
 cross-compiles the binaries with that tag injected
 (`-X main.toolVersion=$TAG`, so `versioner --version` reports the release),
 tags `HEAD`, pushes the tag, and publishes a GitHub release.
 
 ```sh
-./release.bash              # compute version, cross-compile, tag, push, gh release create
-./release.bash --dry-run    # compute + build only; touch nothing remote
-./release.bash --help       # usage
+scripts/release.sh              # compute version, cross-compile, tag, push, gh release create
+scripts/release.sh --dry-run    # compute + build only; touch nothing remote
+scripts/release.sh --help       # usage
 ```
 
 What it does:
 
-1. Checks prerequisites (`go`, `git`, `make`, plus authenticated `gh`
-   for the real release) and a clean working tree.
+1. Checks prerequisites (`go`, `git`, `make`, `tar`, `zip`, plus
+   authenticated `gh` for the real release) and a clean working tree.
 2. Builds `versioner` from source (or uses `$VERSIONER_BIN` if set) and
    runs it against the current repo to compute `VERSION`/`TAG`.
 3. Validates the tag and aborts if it already exists locally or on
    `origin` (make a new `feat:`/`fix:` commit to bump the version, then
    re-run).
 4. Runs `make cross` (`VERSION=$TAG`) → one binary per architecture in
-   `dist/<arch>/versioner[.exe]`. It then stages `README.md`, `LICENSE`,
-   and `versioner.example.json` next to each binary and packs each
-   architecture into `dist/Versioner_<tag>_<arch>.7z` (flat archive of
-   those four files). Finally it writes `dist/checksums.txt` (SHA-256 via
-   `shasum` or `sha256sum`) hashing the `.7z` files. Requires `7z`
-   (`brew install p7zip` / `apt-get install p7zip-full`).
+   `dist/<arch>/versioner[.exe]`. It then stages `README.md` and `LICENSE`
+   next to each binary and packs each architecture into
+   `dist/Versioner_<tag>_<arch>.tar.gz` (flat archive of those three
+   files; `.zip` on Windows). Finally it writes `dist/checksums.txt`
+   (SHA-256 via `shasum` or `sha256sum`) hashing the archives. There is
+   no 7zip dependency anywhere.
 5. Creates an annotated tag, pushes it, and creates the GitHub release
-   (`gh release create --generate-notes`) with the five `.7z` archives +
+   (`gh release create --generate-notes`) with the five archives +
    `checksums.txt`.
 
 The working tree must be clean (no uncommitted changes) and `HEAD`
 should already be pushed when starting a real release. `--dry-run`
 still builds everything but skips tag/push/release; a dirty tree is
 only warned about in dry-run mode. To verify a built binary, run
-`./dist/<os>-<arch>/versioner --version` (or extract a `.7z` first, e.g.
-`7z x dist/Versioner_<tag>_<arch>.7z`) and `shasum -a 256 -c dist/checksums.txt`.
+`./dist/<os>-<arch>/versioner --version` (or extract an archive first, e.g.
+`tar -tzf dist/Versioner_<tag>_<arch>.tar.gz`) and `shasum -a 256 -c dist/checksums.txt`.
 
 ## Usage
 
@@ -183,15 +184,14 @@ Precedence, lowest to highest:
 ### `.versioner.json`
 
 Place `.versioner.json` in the repo root (auto-discovered) or pass
-`--config <path>` / `VERSIONER_CONFIG`. See `versioner.example.json`:
+`--config <path>` / `VERSIONER_CONFIG`. For example (this repository's
+own `.versioner.json` exempts `main` to `0`):
 
 ```json
 {
   "defaultBranchVersion": 254,
-  "exemptBranches": { "main": 1 },
-  "tagPattern": "v[0-9]*",
-  "repoDir": ".",
-  "head": "HEAD"
+  "exemptBranches": { "main": 0 },
+  "tagPattern": "v[0-9]*"
 }
 ```
 
@@ -253,7 +253,7 @@ declare -A EXEMPT_BRANCHES=([main]=1)
 The Go binary does **not** source arbitrary shell files. Move that mapping
 to `.versioner.json` (`exemptBranches`), `VERSIONER_EXEMPT_BRANCHES`, or
 `--exempt-branch main=1`. Everything else in the shell script —
-`LAST_TAG=`, the per-commit ` -> ` trace, `VERSION=`/`TAG=` lines — is
+`LAST_TAG=`, the per-commit `->` trace, `VERSION=`/`TAG=` lines — is
 reproduced in the default `text` format.
 
 ## Exit codes
@@ -281,6 +281,47 @@ Example (`Makefile`):
 VERSION := $(shell ./versioner --quiet | sed -n 's/^VERSION=//p')
 TAG := $(shell ./versioner --quiet | sed -n 's/^TAG=//p')
 ```
+
+## Repository layout
+
+```text
+main.go, version.go, config.go   the versioner CLI (this repository)
+Makefile                         build/test/vet/cross helpers
+scripts/                         env cascade (env.sh, entry.sh, .common.env,
+                                 .<platform>.env), version.bash, build.sh,
+                                 release.sh, docs.sh
+tools/                           bundled binaries from sibling fordaj/* repos
+                                 (barnacle, formattington-lite, logamuffin,
+                                 runner-spawner) + their update.bash refreshers
+.formattington.json              formatting configuration (formattington)
+.versioner.json                  versioner's own configuration (main = 0)
+.runner-spawner.json             self-hosted runner provisioning for this repo
+```
+
+The `tools/` bundles provide logging (logamuffin, via `scripts/entry.sh`),
+version stamping for builds (`scripts/version.bash`, `scripts/build.sh`),
+docs-site generation (barnacle, via `scripts/docs.sh`), formatting
+(formattington), and self-hosted CI runner provisioning (runner-spawner).
+Released binaries are verified and refreshed with the `tools/*/update.bash`
+scripts; archives are platform-native (`.tar.gz` on macOS/Linux, `.zip` on
+Windows).
+
+## Formatting and CI
+
+Formatting is orchestrated by [formattington](https://github.com/fordaj/formattington) via `uv` (Python tooling pinned in `pyproject.toml`/`uv.lock`):
+
+```sh
+./format.bash            # format in place (prettier, gofmt, goimports, shfmt -i 2, taplo)
+./ci/format_check.bash   # CI check: exit 1 if anything needs formatting
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on the repo's self-hosted
+macOS and Windows runners: a formatting check (`./ci/format_check.bash`)
+plus `go vet ./...`, a `gofmt` verification, `go test ./...` and
+`go build ./...`. Runners are managed with
+[runner-spawner](https://github.com/fordaj/runner-spawner) (see
+`.runner-spawner.json` and the bundled binary under
+`tools/runner-spawner/`).
 
 ## Tests
 

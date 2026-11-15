@@ -36,3 +36,12 @@ go.work.sum
 # Local build outputs (binaries are built or fetched, never committed)
 /versioner
 /dist/
+
+# Python tooling (uv / formattington)
+.venv/
+
+# Self-hosted runners (.runner-spawner.json)
+.runners/
+
+# Logs
+.logs/
