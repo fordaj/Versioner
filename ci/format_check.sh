@@ -5,9 +5,9 @@
 #   ./ci/format_check.sh --series     # check sequentially (ordered output)
 #   ./ci/format_check.sh --verbose    # show which formatter executables were resolved
 #
-# This is the check-only counterpart of ./format.sh: it runs the same
+# This is the check-only counterpart of ./scripts/format.sh: it runs the same
 # formattington configuration (.formattington.json) with --check, so it
-# never rewrites files. See ./format.sh for scope, prerequisites, and
+# never rewrites files. See ./scripts/format.sh for scope, prerequisites, and
 # version-pinning details.
 #
 # Exit codes (formattington): 0 = clean, 1 = formatting required,

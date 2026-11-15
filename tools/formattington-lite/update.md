@@ -61,5 +61,5 @@ run from any directory.
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
-- [../../format.md](../../format.md) — how this repo actually runs formattington (via `uv`)
+- [../../format.md](../../scripts/format.md) — how this repo actually runs formattington (via `uv`)
 - [../../scripts/README.md](../../scripts/README.md) — the scripts directory

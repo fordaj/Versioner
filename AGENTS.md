@@ -43,7 +43,7 @@ Go dependencies.
   GitHub releases (platform-native `.tar.gz`/`.zip` assets; legacy `.7z`
   still accepted). `scripts/entry.sh` exposes `log()` (logamuffin-backed).
 - `.formattington.json` — formatting configuration (formattington); the
-  repo formats itself with it via `./format.sh` / `./ci/format_check.sh`.
+  repo formats itself with it via `./scripts/format.sh` / `./ci/format_check.sh`.
 - `.runner-spawner.json` — self-hosted runner provisioning for this repo
   (consumed by `runner-spawner create`).
 - `.versioner.json` — this repo's own configuration (`main` → `0`).
@@ -103,7 +103,7 @@ make build          # ./versioner
 make cross          # ./dist/ binaries for 5 targets
 ./scripts/release.sh --dry-run   # preview dogfooding release (no tag/push)
 ./scripts/docs.sh                # regenerate the documentation site into ./site/
-./format.sh                   # format in place (formattington via uv)
+./scripts/format.sh                   # format in place (formattington via uv)
 ./ci/format_check.sh          # CI formatting gate
 ```
 
@@ -138,7 +138,7 @@ Layout — documentation lives next to the code it describes:
 
 - One sibling `.md` per Go source file at the repo root: `main.go` →
   `main.md`, `config.go` → `config.md`, `version.go` → `version.md`
-  (test files have no pages), plus `format.sh` → `format.md`.
+  (test files have no pages), plus `scripts/format.sh` → `scripts/format.md`.
 - One sibling `.md` per script: `scripts/build.sh` → `build.md`,
   `scripts/docs.sh` → `docs.md`, `scripts/entry.sh` → `entry.md`,
   `scripts/env.sh` → `env.md`, `scripts/release.sh` → `release.md`,

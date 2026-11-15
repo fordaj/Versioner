@@ -83,7 +83,7 @@ jobs:
         with:
           node-version: 22
 
-      # prettier (pnpm) — matches the PATH-only requirement in format.sh.
+      # prettier (pnpm) — matches the PATH-only requirement in scripts/format.sh.
       - name: Install pnpm
         shell: bash
         run: |

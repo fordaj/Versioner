@@ -26,9 +26,10 @@ Vernacular used in the headers (`log INFO`, `$REPO_ROOT_DIR`,
 
 - [version.sh](version.md) — print the repository version computed by
   versioner (`--format text|shell|json`).
+- [format.sh](format.md) — format the repository in place with formattington.
 - [build.sh](build.md) — cross-compile versioner into `dist/` with the
   version stamped in via `-ldflags`.
-- [scripts/docs.sh](docs.md) — generate the documentation site you are reading,
+- [docs.sh](docs.md) — generate the documentation site you are reading,
   with the bundled barnacle.
 - [release.sh](release.md) — dogfooding release: compute the tag with
   versioner, cross-compile, tag, push, and publish the GitHub release.

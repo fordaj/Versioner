@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Format the versioner repository in place with formattington.
 #
-#   ./format.sh              # format all matching files in place
-#   ./format.sh --series     # format sequentially (ordered output)
-#   ./format.sh --verbose    # show which formatter executables were resolved
+#   ./scripts/format.sh              # format all matching files in place
+#   ./scripts/format.sh --series     # format sequentially (ordered output)
+#   ./scripts/format.sh --verbose    # show which formatter executables were resolved
 #
 # Formattington (https://github.com/fordaj/formattington) is pinned in
 # pyproject.toml (git commit) and locked in uv.lock. This project uses

@@ -3,7 +3,7 @@
 `tools/` carries the repository's pinned helper binaries — logging, docs,
 and runner-provisioning tooling — plus one `update.sh` per tool that
 refreshes them. These are **not** the formatters this repository formats
-itself with (those are driven by [`format.sh`](../format.md) via `uv` and
+itself with (those are driven by [`format.sh`](../scripts/format.md) via `uv` and
 `pyproject.toml`), and `versioner` itself is **not** bundled here — this
 repository *is* versioner (see the note below).
 

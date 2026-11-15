@@ -318,7 +318,7 @@ for keeping the pages current live in `AGENTS.md` and `scripts/docs.md`.
 Formatting is orchestrated by [formattington](https://github.com/fordaj/formattington) via `uv` (Python tooling pinned in `pyproject.toml`/`uv.lock`):
 
 ```sh
-./format.sh            # format in place (prettier, gofmt, goimports, shfmt -i 2, taplo)
+./scripts/format.sh            # format in place (prettier, gofmt, goimports, shfmt -i 2, taplo)
 ./ci/format_check.sh   # CI check: exit 1 if anything needs formatting
 ```
 
