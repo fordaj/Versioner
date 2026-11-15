@@ -1,7 +1,7 @@
 {
   "owner": "fordaj",
-  "repo": "Versioner",
-  "runnerNames": ["ci-macos", "ci-windows"],
+  "repo": "runner-spawner",
+  "runnerNames": ["runner01"],
   "runnersDir": ".runners",
   "runnerGroup": "Default",
   "runnerVersion": "2.338.2"
