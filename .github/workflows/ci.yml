@@ -11,6 +11,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   check-formatting:
     name: Check Formatting
@@ -25,14 +28,46 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: ./repo
     steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+      # Clone the repo with mirror-clone when available; fall back to
+      # git clone otherwise (or if mirror-clone fails). A full clone is
+      # required for the git-tag-derived version checks.
+      - name: Clone Repo
+        # Job default is ./repo, but ./repo is created by this step.
+        working-directory: .
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd "${RUNNER_TEMP:-/tmp}"
+          branch="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          clone_dir="$GITHUB_WORKSPACE/repo"
+          rm -rf "$clone_dir"
+          mkdir -p "$clone_dir"
+          if command -v mirror-clone >/dev/null 2>&1; then
+            echo "using mirror-clone"
+            mirror-clone --branch "$branch" \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+              "$clone_dir" || {
+                echo "mirror-clone failed; falling back to git clone"
+                rm -rf "$clone_dir"
+                mkdir -p "$clone_dir"
+                git clone --branch "$branch" \
+                  "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+                  "$clone_dir"
+              }
+          else
+            echo "mirror-clone not installed; using git clone"
+            git clone --branch "$branch" \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+              "$clone_dir"
+          fi
 
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: ./repo/go.mod
           cache: false
 
       # goimports via `go install` (lands in $(go env GOPATH)/bin).
@@ -43,14 +78,29 @@ jobs:
       # fetches CPython 3.14 on first use.
       - uses: astral-sh/setup-uv@v7
 
-      # node + npm for the PATH-only formatter CLIs (prettier).
+      # node + pnpm for the PATH-only formatter CLIs (prettier).
       - uses: actions/setup-node@v7
         with:
           node-version: 22
 
-      # prettier (npm) — matches the PATH-only requirement in format.bash.
+      # prettier (pnpm) — matches the PATH-only requirement in format.bash.
+      - name: Install pnpm
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack prepare pnpm@10 --activate
+
       - name: Install prettier
-        run: npm install --global prettier
+        shell: bash
+        run: |
+          set -euo pipefail
+          PNPM_HOME="$HOME/pnpm"
+          mkdir -p "$PNPM_HOME"
+          export PATH="$PNPM_HOME:$PATH"
+          pnpm config set global-bin-dir "$PNPM_HOME"
+          pnpm add --global prettier
+          echo "$PNPM_HOME" >> "$GITHUB_PATH"
 
       # shfmt — pinned release, installed into a scratch bin dir.
       - name: Install shfmt
@@ -99,13 +149,45 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: ./repo
     steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+      # Clone the repo with mirror-clone when available; fall back to
+      # git clone otherwise (or if mirror-clone fails). A full clone is
+      # required for the git-tag-derived version checks.
+      - name: Clone Repo
+        # Job default is ./repo, but ./repo is created by this step.
+        working-directory: .
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd "${RUNNER_TEMP:-/tmp}"
+          branch="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          clone_dir="$GITHUB_WORKSPACE/repo"
+          rm -rf "$clone_dir"
+          mkdir -p "$clone_dir"
+          if command -v mirror-clone >/dev/null 2>&1; then
+            echo "using mirror-clone"
+            mirror-clone --branch "$branch" \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+              "$clone_dir" || {
+                echo "mirror-clone failed; falling back to git clone"
+                rm -rf "$clone_dir"
+                mkdir -p "$clone_dir"
+                git clone --branch "$branch" \
+                  "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+                  "$clone_dir"
+              }
+          else
+            echo "mirror-clone not installed; using git clone"
+            git clone --branch "$branch" \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+              "$clone_dir"
+          fi
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: ./repo/go.mod
           cache: false
       - run: go vet ./...
       - run: gofmt -l . && test -z "$(gofmt -l .)"
