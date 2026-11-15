@@ -8,6 +8,8 @@
 *.so
 *.dylib
 *.DS_Store
+# ... except bundled tools binaries
+!tools/**/*.exe
 
 # Test binary, built with `go test -c`
 *.test
