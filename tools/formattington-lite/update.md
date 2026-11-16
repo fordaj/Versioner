@@ -16,7 +16,7 @@ helpers.
 ```text
 tools/formattington-lite/
   update.sh                     # refresh from fordaj/formattington releases
-  v0.0.2.0.53/
+  v0.0.3.0.67/
     macos-arm64/formattington
     macos-x86_64/formattington
     linux-arm64/formattington
@@ -37,7 +37,7 @@ formattington-lite's settings: repository `fordaj/formattington`, binary
 `FORMATTINGTON_REPO`, only `-lite` archives installed (assets whose stem
 does not contain `-lite`, e.g. the `-full` builds, are ignored),
 `NOTICE.md` and `LICENSES/` copied next to each binary when present
-(neither is present in the committed `v0.0.2.0.53`), missing checksums
+(neither is present in the committed `v0.0.3.0.67`), missing checksums
 file is a warning (not fatal).
 
 `--dry-run` lists assets without touching anything; `--help` prints

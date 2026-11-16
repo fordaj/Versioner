@@ -176,7 +176,7 @@ parse_stem_to_platform() {
   local stem="$1"
   # Capture the trailing all-lowercase token (e.g. "darwin-arm64" or
   # "darwin-arm64-lite"); strip a variant suffix if present.
-  if [[ ! "$stem" =~ [-_]([a-z0-9-]+)$ ]]; then
+  if [[ ! "$stem" =~ [-_]([a-z0-9_-]+)$ ]]; then
     return 1
   fi
   local token="${BASH_REMATCH[1]}"
