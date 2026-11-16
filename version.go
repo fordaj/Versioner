@@ -154,16 +154,21 @@ var gitRun = func(dir string, args ...string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-// LastTag returns the most recent tag matching pattern, or "" if none.
-// Errors are swallowed (matching `git describe ... || true` in the shell
-// script); a missing tag and a missing repo both yield "". Callers rely on
-// the subsequent git log call to surface "not a repo / no commits" errors.
-func LastTag(dir, pattern string) string {
-	out, err := gitRun(dir, "describe", "--tags", "--abbrev=0", "--match", pattern)
+// gitTrimmed runs git in dir and returns trimmed stdout, swallowing any
+// error (matching the shell script's lenient `|| true` behaviour).
+func gitTrimmed(dir string, args ...string) string {
+	out, err := gitRun(dir, args...)
 	if err != nil {
 		return ""
 	}
 	return strings.TrimSpace(out)
+}
+
+// LastTag returns the most recent tag matching pattern, or "" if none.
+// Errors are swallowed; a missing tag and a missing repo both yield "". Callers rely on
+// the subsequent git log call to surface "not a repo / no commits" errors.
+func LastTag(dir, pattern string) string {
+	return gitTrimmed(dir, "describe", "--tags", "--abbrev=0", "--match", pattern)
 }
 
 // RevListCount returns `git rev-list <ref> --count`.
@@ -172,7 +177,7 @@ func RevListCount(dir, ref string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	n, err := strconv.Atoi(strings.TrimSpace(out))
+	n, err := strconv.Atoi(out)
 	if err != nil {
 		return 0, fmt.Errorf("cannot parse rev-list count %q: %w", out, err)
 	}
@@ -182,11 +187,7 @@ func RevListCount(dir, ref string) (int, error) {
 // CurrentBranch returns `git branch --show-current` ("" when detached).
 // Errors are swallowed, matching the shell script's lenient behaviour.
 func CurrentBranch(dir string) string {
-	out, err := gitRun(dir, "branch", "--show-current")
-	if err != nil {
-		return ""
-	}
-	return strings.TrimSpace(out)
+	return gitTrimmed(dir, "branch", "--show-current")
 }
 
 // LogSubjects returns commit subjects for ref range, oldest first.
@@ -195,7 +196,7 @@ func LogSubjects(dir, ref string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if strings.TrimSpace(out) == "" {
+	if out == "" {
 		return nil, nil
 	}
 	lines := strings.Split(out, "\n")

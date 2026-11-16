@@ -43,7 +43,7 @@ Unknown arguments print usage to stderr and exit `2`.
    `checksums.txt`. If a release for the tag already exists, it dies and
    suggests `gh release upload` manually.
 
-`--dry-run` stops after step 4 and prints what it *would* do (tag, push,
+`--dry-run` stops after step 4 and prints what it _would_ do (tag, push,
 release) without touching anything remote.
 
 ## Notes
@@ -59,4 +59,4 @@ release) without touching anything remote.
 
 - [build.md](build.md) — the cross-compile this depends on (via `make cross`)
 - [version.md](version.md) — the version computation it dogfoods
-- [entry.md](entry.md) · [env.md](env.md) — the cascade this script does *not* use
+- [entry.md](entry.md) · [env.md](env.md) — the cascade this script does _not_ use

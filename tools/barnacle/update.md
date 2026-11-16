@@ -21,33 +21,19 @@ tools/barnacle/
 
 ## `update.sh` in detail
 
-The script downloads the latest (or `--tag`ged) barnacle release from
-GitHub via `gh` and stages it into `tools/barnacle/v<tag>/<platform>/`.
+`update.sh` is a thin wrapper around [`tools/update.sh`](../update.md) —
+the shared download/verify/stage/swap implementation. It declares the
+bundle's settings and execs that script; see
+[../update.md](../update.md) for the full algorithm.
 
-1. Resolves the tag (latest release via `gh release view`, or `--tag` /
-   `BARNACLE_TAG`), validating the tag shape (`vX.Y.Z…`).
-2. Downloads `*.tar.gz`, `*.zip`, `*.7z` plus
-   `checksums.txt`/`SHA256SUMS.txt` via `gh release download`. If a
-   checksums file is present, every downloaded archive is verified
-   (`shasum -a 256 -c` or `sha256sum -c`); a mismatch is fatal. If not, a
-   warning is logged and verification is skipped.
-3. Extracts each archive (`tar` for `.tar.gz`; `unzip`, or `7z`/`7zz` for
-   `.zip`/legacy `.7z`), normalises platform names (`darwin-amd64` →
-   `macos-x86_64`, `x64`/`amd64` → `x86_64`), and copies the binary into
-   `v<tag>/<platform>/`, executable. If the archive carries a top-level
-   `LICENSE`, it is copied alongside the binary in each platform dir (none
-   is present in the committed `v0.0.1.0.5`).
-4. Swaps in the new version directory and deletes superseded `v*/` folders
-   only after the new one is fully staged, then smoke-tests the host
-   binary (`barnacle --version`).
+Barnacle's settings: repository `fordaj/barnacle`, binary `barnacle`,
+tag override `BARNACLE_TAG`, slug override `BARNACLE_REPO`, every
+platform archive installed (no suffix filter), `LICENSE` copied next to
+each binary when the archive carries one (none is present in the
+committed `v0.0.1.0.5`), missing checksums file is a warning (not fatal).
 
-Only platform archives are kept (no `-lite`/`-full` filtering — every
-platform archive is installed). Prerequisites: `gh` and `tar` (plus
-`unzip` for `.zip` assets; `7z`/`7zz` only for legacy `.7z`). Environment
-overrides: `BARNACLE_REPO` (default `fordaj/barnacle`), `BARNACLE_TAG`.
 `--dry-run` lists assets without touching anything; `--help` prints
-usage. The script sources [`scripts/entry.sh`](../../scripts/entry.md) for
-logging and can run from any directory.
+usage. It can run from any directory.
 
 ## How the repository uses it
 
@@ -58,4 +44,5 @@ repo root; the output is git-ignored.
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
+- [../update.md](../update.md) — the shared implementation behind this wrapper
 - [../../scripts/README.md](../../scripts/README.md) — the scripts that consume the bundle

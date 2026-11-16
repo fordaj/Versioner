@@ -34,9 +34,10 @@ Vernacular used in the headers (`log INFO`, `$REPO_ROOT_DIR`,
 - [release.sh](release.md) — dogfooding release: compute the tag with
   versioner, cross-compile, tag, push, and publish the GitHub release.
 
-The `tools/` bundles are documented in `tools/README.md` and
-`tools/<name>/update.md` (source pages; `tools/` is excluded from the
-barnacle scan, so they are not rendered into the site).
+The `tools/` bundles are documented in `tools/README.md`,
+`tools/update.md` (the shared refresher) and `tools/<name>/update.md`
+(source pages; `tools/` is excluded from the barnacle scan, so they are
+not rendered into the site).
 
 ## Related pages
 

@@ -23,10 +23,6 @@
 #     prettier: `npm install -g prettier`;
 #     goimports: `go install golang.org/x/tools/cmd/goimports@latest`)
 #
-# Style is configured by .prettierrc at the repo root. The bundled
-# binaries under tools/ are skipped (as are dist/ and other generated
-# locations).
-#
 # To check formatting without modifying files (CI):
 #   ./ci/format_check.sh
 #
@@ -35,12 +31,21 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$SCRIPT_DIR"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
 if ! command -v uv >/dev/null 2>&1; then
   echo "ERROR: uv not found (https://docs.astral.sh/uv/)" >&2
   exit 1
+fi
+
+# goimports installed via `go install` lands in $(go env GOPATH)/bin,
+# which is not always on PATH. Prepend it when Go is available.
+if command -v go >/dev/null 2>&1; then
+  GOPATH_BIN="$(go env GOPATH)/bin"
+  if [[ -d "$GOPATH_BIN" && ":$PATH:" != *":$GOPATH_BIN:"* ]]; then
+    export PATH="$GOPATH_BIN:$PATH"
+  fi
 fi
 
 exec uv run formattington "$@" --config "$REPO_ROOT/.formattington.json" all

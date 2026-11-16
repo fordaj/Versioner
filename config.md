@@ -23,18 +23,18 @@ flags-only knobs never serialised: `Format` and `Quiet`.
   not an error.
 - `LoadFile(path)` — parses a `.versioner.json` into the `Config`. A
   partial struct keeps omitted fields at their current values; unknown
-  keys are ignored; the file's `exemptBranches` map *replaces* the
+  keys are ignored; the file's `exemptBranches` map _replaces_ the
   current one. Invalid JSON is an error (exit `2` via [main.md](main.md)).
 - `ParseExemptBranches(s)` — JSON object (`{"main":1}`) or comma list
   (`main=1,develop=2`; `main:1` also accepted). Empty input yields an
   empty map; keys must be non-empty; values are integers.
-- `ParseBool(s)` — `strconv.ParseBool` after trimming whitespace.
 - `ApplyEnv(getenv)` — overlays the `VERSIONER_*` variables (`getenv`
   defaults to `os.Getenv`; tests inject their own). `VERSIONER_CONFIG` is
   deliberately **not** applied here — `main` consumes it earlier to pick
-  the file. Env `VERSIONER_EXEMPT_BRANCHES` entries *merge per-branch*
-  over the file's map (env wins); every other env value replaces the
-  file's wholesale. Bad integers/booleans are errors.
+  the file. Env `VERSIONER_EXEMPT_BRANCHES` entries _merge per-branch_
+  over the file's map (env wins); every other env value (string overlays
+  are applied from a small table) replaces the file's wholesale. Bad
+  integers/booleans are errors.
 
 Env vars honoured here: `VERSIONER_REPO_DIR`, `VERSIONER_HEAD`,
 `VERSIONER_BRANCH`, `VERSIONER_TAG_PATTERN`,

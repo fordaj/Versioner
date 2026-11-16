@@ -23,6 +23,7 @@ var toolVersion = "dev"
 
 func main() {
 	if err := run(os.Args[1:], os.Stdout, os.Stderr); err != nil {
+		fmt.Fprintf(os.Stderr, "versioner: %v\n", err)
 		os.Exit(exitCode(err))
 	}
 }
@@ -42,10 +43,12 @@ func exitCode(err error) int {
 	return 1
 }
 
+// configErrf returns an exit-2 (usage/config) error.
 func configErrf(format string, args ...any) error {
 	return &codedError{code: 2, msg: fmt.Sprintf(format, args...)}
 }
 
+// computeErrf returns an exit-1 (computation) error.
 func computeErrf(format string, args ...any) error {
 	return &codedError{code: 1, msg: fmt.Sprintf(format, args...)}
 }
@@ -124,13 +127,10 @@ func run(args []string, stdout, stderr io.Writer) error {
 		if err == flag.ErrHelp {
 			return nil
 		}
-		fmt.Fprintln(stderr, "versioner:", err)
-		return &codedError{code: 2, msg: err.Error()}
+		return configErrf("%v", err)
 	}
 	if fs.NArg() > 0 {
-		msg := fmt.Sprintf("unexpected positional arguments: %s", strings.Join(fs.Args(), " "))
-		fmt.Fprintln(stderr, "versioner:", msg)
-		return &codedError{code: 2, msg: msg}
+		return configErrf("unexpected positional arguments: %s", strings.Join(fs.Args(), " "))
 	}
 	if *showVersion {
 		fmt.Fprintln(stdout, "versioner "+toolVersion)
@@ -150,6 +150,8 @@ func run(args []string, stdout, stderr io.Writer) error {
 	cfg.RepoDir = prelimRepoDir
 
 	// Explicit config: --config > VERSIONER_CONFIG; else auto-discover.
+	// An explicitly requested but missing/unreadable file is an error
+	// (LoadFile reports it); a merely absent auto-discovered file is fine.
 	explicitConfig := os.Getenv(EnvConfig)
 	if *configPath != "" {
 		explicitConfig = *configPath
@@ -160,21 +162,13 @@ func run(args []string, stdout, stderr io.Writer) error {
 	}
 	if configFile != "" {
 		if err := cfg.LoadFile(configFile); err != nil {
-			fmt.Fprintln(stderr, "versioner:", err)
-			return &codedError{code: 2, msg: err.Error()}
-		}
-	} else if explicitConfig != "" {
-		if _, err := os.Stat(explicitConfig); err != nil {
-			msg := fmt.Sprintf("config file %q not found", explicitConfig)
-			fmt.Fprintln(stderr, "versioner:", msg)
-			return &codedError{code: 2, msg: msg}
+			return configErrf("%v", err)
 		}
 	}
 
 	// Env layer (may redefine repoDir etc.).
 	if err := cfg.ApplyEnv(nil); err != nil {
-		fmt.Fprintln(stderr, "versioner:", err)
-		return &codedError{code: 2, msg: err.Error()}
+		return configErrf("%v", err)
 	}
 
 	// Flag layer (explicit only; unset flags must not clobber env/file).
@@ -212,14 +206,10 @@ func run(args []string, stdout, stderr io.Writer) error {
 	switch cfg.Format {
 	case "text", "shell", "json":
 	default:
-		msg := fmt.Sprintf("invalid --format %q (want text, shell, or json)", cfg.Format)
-		fmt.Fprintln(stderr, "versioner:", msg)
-		return &codedError{code: 2, msg: msg}
+		return configErrf("invalid --format %q (want text, shell, or json)", cfg.Format)
 	}
 	if cfg.TagPattern == "" {
-		msg := "tag pattern must not be empty"
-		fmt.Fprintln(stderr, "versioner:", msg)
-		return &codedError{code: 2, msg: msg}
+		return configErrf("tag pattern must not be empty")
 	}
 	if cfg.RepoDir == "" {
 		cfg.RepoDir = "."
@@ -230,7 +220,6 @@ func run(args []string, stdout, stderr io.Writer) error {
 
 	res, err := Compute(cfg)
 	if err != nil {
-		fmt.Fprintln(stderr, "versioner:", err)
 		return computeErrf("%v", err)
 	}
 

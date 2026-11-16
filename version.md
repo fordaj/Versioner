@@ -35,7 +35,9 @@ Version}`), `Result` (`LastTag`, `Branch`, `Version`, `Subjects`, `Trace`).
 ## Git plumbing
 
 `gitRun` is a package-level variable (`exec.Command("git", …)`) so tests
-can stub git without a real repository. Built on it:
+can stub git without a real repository. `gitTrimmed` wraps it for the
+lenient call sites (log-and-swallow); everything else surfaces errors.
+Built on them:
 
 - `LastTag(dir, pattern)` — `git describe --tags --abbrev=0 --match`;
   errors swallowed (the shell's `|| true`): missing tag and missing repo

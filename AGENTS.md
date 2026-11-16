@@ -38,10 +38,13 @@ Go dependencies.
 - `scripts/` — the env cascade (`env.sh`, `entry.sh`, `.common.env`,
   `.<platform>.env`), `version.sh`, `build.sh`, `docs.sh`.
 - `tools/` — bundled binaries from the sibling `fordaj/*` repos
-  (`barnacle`, `formattington-lite`, `logamuffin`, `runner-spawner`)
-  with one `update.sh` per tool refreshing them from the upstream
-  GitHub releases (platform-native `.tar.gz`/`.zip` assets; legacy `.7z`
-  still accepted). `scripts/entry.sh` exposes `log()` (logamuffin-backed).
+  (`barnacle`, `formattington-lite`, `logamuffin`, `runner-spawner`).
+  One `update.sh` per tool refreshing them from the upstream GitHub
+  releases (platform-native `.tar.gz`/`.zip` assets; legacy `.7z`
+  still accepted); the per-tool scripts are thin wrappers over the
+  shared `tools/update.sh` implementation (sibling page
+  `tools/update.md`). `scripts/entry.sh` exposes `log()`
+  (logamuffin-backed).
 - `.formattington.json` — formatting configuration (formattington); the
   repo formats itself with it via `./scripts/format.sh` / `./ci/format_check.sh`.
 - `.runner-spawner.json` — self-hosted runner provisioning for this repo
@@ -146,7 +149,9 @@ Layout — documentation lives next to the code it describes:
   hub.
 - One sibling `.md` per bundle in `tools/` (`tools/<name>/update.sh` →
   `tools/<name>/update.md`: `barnacle`, `formattington-lite`,
-  `logamuffin`, `runner-spawner`), plus `tools/README.md` as the hub.
+  `logamuffin`, `runner-spawner`), plus `tools/update.sh` →
+  `tools/update.md` for the shared implementation, plus `tools/README.md`
+  as the hub.
   `.barnacle.json` excludes `tools/` from the scan, so these pages are
   source-only (never rendered); reference them by path in code spans —
   do not link to them from rendered pages (barnacle would emit dead
