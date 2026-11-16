@@ -27,39 +27,25 @@ tools/formattington-lite/
 
 ## `update.sh` in detail
 
-The script downloads the latest (or `--tag`ged) formattington release from
-GitHub via `gh` and stages it into
-`tools/formattington-lite/v<tag>/<platform>/`.
+`update.sh` is a thin wrapper around [`tools/update.sh`](../update.md) —
+the shared download/verify/stage/swap implementation. It declares the
+bundle's settings and execs that script; see
+[../update.md](../update.md) for the full algorithm.
 
-1. Resolves the tag (latest release via `gh release view`, or `--tag` /
-   `FORMATTINGTON_TAG`), validating the tag shape (`vX.Y.Z…`).
-2. Downloads `*.tar.gz`, `*.zip`, `*.7z` plus
-   `checksums.txt`/`SHA256SUMS.txt` via `gh release download`. If a
-   checksums file is present, every downloaded archive is verified
-   (`shasum -a 256 -c` or `sha256sum -c`); a mismatch is fatal. If not, a
-   warning is logged and verification is skipped.
-3. **Filters for `-lite` assets only** — any asset whose stem does not
-   contain `-lite` is ignored (this is the one bundle that discriminates;
-   the others install every platform archive). Platform names are
-   normalised (`darwin-amd64` → `macos-x86_64`).
-4. Extracts each archive (`tar` for `.tar.gz`; `unzip`, or `7z`/`7zz` for
-   `.zip`/legacy `.7z`), copies the binary into `v<tag>/<platform>/`
-   (executable), and — when present — copies top-level `NOTICE.md` and
-   `LICENSES/` into each platform dir (none are present in the committed
-   `v0.0.2.0.53`).
-5. Swaps in the new version directory and deletes superseded `v*/` folders
-   only after the new one is fully staged, then smoke-tests the host
-   binary (`formattington --version`).
+formattington-lite's settings: repository `fordaj/formattington`, binary
+`formattington`, tag override `FORMATTINGTON_TAG`, slug override
+`FORMATTINGTON_REPO`, only `-lite` archives installed (assets whose stem
+does not contain `-lite`, e.g. the `-full` builds, are ignored),
+`NOTICE.md` and `LICENSES/` copied next to each binary when present
+(neither is present in the committed `v0.0.2.0.53`), missing checksums
+file is a warning (not fatal).
 
-Prerequisites: `gh` and `tar` (plus `unzip` for `.zip` assets; `7z`/`7zz`
-only for legacy `.7z`). Environment overrides: `FORMATTINGTON_REPO`
-(default `fordaj/formattington`), `FORMATTINGTON_TAG`. `--dry-run` lists
-assets without touching anything; `--help` prints usage. The script
-sources [`scripts/entry.sh`](../../scripts/entry.md) for logging and can
-run from any directory.
+`--dry-run` lists assets without touching anything; `--help` prints
+usage. It can run from any directory.
 
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
+- [../update.md](../update.md) — the shared implementation behind this wrapper
 - [../../format.md](../../scripts/format.md) — how this repo actually runs formattington (via `uv`)
 - [../../scripts/README.md](../../scripts/README.md) — the scripts directory

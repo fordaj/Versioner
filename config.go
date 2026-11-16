@@ -158,11 +158,6 @@ func ParseExemptBranches(s string) (map[string]int, error) {
 	return out, nil
 }
 
-// ParseBool parses boolean env values.
-func ParseBool(s string) (bool, error) {
-	return strconv.ParseBool(strings.TrimSpace(s))
-}
-
 // ApplyEnv overlays VERSIONER_* variables. getenv defaults to os.Getenv
 // so tests can inject an environment.
 func (c *Config) ApplyEnv(getenv func(string) string) error {
@@ -171,17 +166,19 @@ func (c *Config) ApplyEnv(getenv func(string) string) error {
 	}
 	// Note: EnvConfig is consumed by main before ApplyEnv (it selects the
 	// file, so it cannot be applied here). Ignore it here.
-	if v := getenv(EnvRepoDir); v != "" {
-		c.RepoDir = v
-	}
-	if v := getenv(EnvHead); v != "" {
-		c.Head = v
-	}
-	if v := getenv(EnvBranch); v != "" {
-		c.Branch = v
-	}
-	if v := getenv(EnvTagPattern); v != "" {
-		c.TagPattern = v
+	for _, ov := range []struct {
+		env string
+		dst *string
+	}{
+		{EnvRepoDir, &c.RepoDir},
+		{EnvHead, &c.Head},
+		{EnvBranch, &c.Branch},
+		{EnvTagPattern, &c.TagPattern},
+		{EnvFormat, &c.Format},
+	} {
+		if v := getenv(ov.env); v != "" {
+			*ov.dst = v
+		}
 	}
 	if v := getenv(EnvDefault); v != "" {
 		n, err := strconv.Atoi(strings.TrimSpace(v))
@@ -200,11 +197,8 @@ func (c *Config) ApplyEnv(getenv func(string) string) error {
 			c.ExemptBranches[k] = val
 		}
 	}
-	if v := getenv(EnvFormat); v != "" {
-		c.Format = v
-	}
 	if v := getenv(EnvQuiet); v != "" {
-		b, err := ParseBool(v)
+		b, err := strconv.ParseBool(strings.TrimSpace(v))
 		if err != nil {
 			return fmt.Errorf("%s: invalid boolean %q", EnvQuiet, v)
 		}

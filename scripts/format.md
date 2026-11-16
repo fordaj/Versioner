@@ -8,7 +8,8 @@ non-zero when anything needs formatting).
 ## What it does
 
 The script is a thin wrapper: it checks for `uv` (exits `1` with a link if
-missing) and then runs
+missing), prepends `$(go env GOPATH)/bin` to `PATH` when Go is available
+(so `go install`-ed `goimports` resolves), and then runs
 
 ```text
 uv run formattington "$@" --config <repo>/.formattington.json all
@@ -39,7 +40,7 @@ generated locations.
 ## Where it is used
 
 - Locally: `./scripts/format.sh` (see `AGENTS.md` and the README "Formatting
-and CI" section).
+  and CI" section).
 - CI: `.github/workflows/ci.yml` runs `ci/format_check.sh` (not this
   script) as the Check Formatting job.
 

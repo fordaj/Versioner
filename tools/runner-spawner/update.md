@@ -26,36 +26,25 @@ tools/runner-spawner/
 
 ## `update.sh` in detail
 
-The script downloads the latest (or `--tag`ged) runner-spawner release
-from GitHub via `gh` and stages it into
-`tools/runner-spawner/v<tag>/<platform>/`.
+`update.sh` is a thin wrapper around [`tools/update.sh`](../update.md) —
+the shared download/verify/stage/swap implementation. It declares the
+bundle's settings and execs that script; see
+[../update.md](../update.md) for the full algorithm.
 
-1. Resolves the tag (latest release via `gh release view`, or `--tag` /
-   `RUNNER_SPAWNER_TAG`), validating the tag shape (`vX.Y.Z…`).
-2. Downloads `*.tar.gz`, `*.zip`, `*.7z` plus
-   `checksums.txt`/`SHA256SUMS.txt` via `gh release download`. If a
-   checksums file is present, every downloaded archive is verified
-   (`shasum -a 256 -c` or `sha256sum -c`); a mismatch is fatal.
-   **If no checksums file is present the script refuses to install**
-   (`no checksums.txt/SHA256SUMS.txt in <tag> release; refusing to install
-   unverified binaries`) — the only bundle that fails closed.
-3. Extracts each archive (`tar` for `.tar.gz`; `unzip`, or `7z`/`7zz` for
-   `.zip`/legacy `.7z`), normalises platform names (`darwin-amd64` →
-   `macos-x86_64`), and copies the binary into `v<tag>/<platform>/`,
-   executable. Only the binary is kept.
-4. Swaps in the new version directory and deletes superseded `v*/` folders
-   only after the new one is fully staged, then smoke-tests the host
-   binary (`runner-spawner --version`).
+runner-spawner's settings: repository `fordaj/runner-spawner`, binary
+`runner-spawner`, tag override `RUNNER_SPAWNER_TAG`, slug override
+`RUNNER_SPAWNER_TOOL_REPO` (note the `_TOOL_` infix, so it does not
+collide with other `RUNNER_SPAWNER_*` variables), every platform archive
+installed (no suffix filter), only the binary is kept. **If no checksums
+file is present the script refuses to install** (`no checksums.txt/
+SHA256SUMS.txt in <tag> release; refusing to install unverified
+binaries`) — the only bundle that fails closed.
 
-Prerequisites: `gh` and `tar` (plus `unzip` for `.zip` assets; `7z`/`7zz`
-only for legacy `.7z`). Environment overrides: `RUNNER_SPAWNER_TOOL_REPO`
-(default `fordaj/runner-spawner` — note the `_TOOL_` infix, so it does not
-collide with other `RUNNER_SPAWNER_*` variables), `RUNNER_SPAWNER_TAG`.
 `--dry-run` lists assets without touching anything; `--help` prints
-usage. The script sources [`scripts/entry.sh`](../../scripts/entry.md) for
-logging and can run from any directory.
+usage. It can run from any directory.
 
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
+- [../update.md](../update.md) — the shared implementation behind this wrapper
 - [../../scripts/env.md](../../scripts/env.md) — the cascade that selects `RUNNER_SPAWNER_BIN`

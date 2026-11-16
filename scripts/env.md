@@ -31,12 +31,12 @@ is documented here:
 - **`.common.env`** — `TOOLS_DIR=tools`; the upstream `fordaj/*` repository
   slugs; and the pinned `*_VERSION_DIR`s. The current pins:
 
-  | Tool | Repo slug | Pinned version dir |
-  | --- | --- | --- |
-  | versioner | `fordaj/Versioner` | `tools/versioner/v0.0.3.0.5` |
-  | logamuffin | `fordaj/logamuffin` | `tools/logamuffin/v0.1.3.0.35` |
+  | Tool           | Repo slug               | Pinned version dir                |
+  | -------------- | ----------------------- | --------------------------------- |
+  | versioner      | `fordaj/Versioner`      | `tools/versioner/v0.0.3.0.5`      |
+  | logamuffin     | `fordaj/logamuffin`     | `tools/logamuffin/v0.1.3.0.35`    |
   | runner-spawner | `fordaj/runner-spawner` | `tools/runner-spawner/v0.0.1.2.6` |
-  | barnacle | `fordaj/barnacle` | `tools/barnacle/v0.0.1.0.5` |
+  | barnacle       | `fordaj/barnacle`       | `tools/barnacle/v0.0.1.0.5`       |
 
   It also carries `VERSIONER_TAG_PATTERN=v[0-9]*` and
   `VERSIONER_CONFIG_FILE=.versioner.json`. Note that
@@ -45,7 +45,7 @@ is documented here:
   binary's built-in default. `VERSIONER_REPO`/`VERSIONER_CONFIG_FILE` are
   pin metadata; the binary does not read them (it reads `VERSIONER_CONFIG`).
 
-  **The versioner pin is dangling by design.** This repository *is*
+  **The versioner pin is dangling by design.** This repository _is_
   versioner: `tools/versioner/` does not exist, and every platform file
   sets `VERSIONER_BIN=""` (with a comment saying so).
   [version.md](version.md) therefore falls back to `go run .` when

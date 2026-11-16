@@ -2,7 +2,8 @@
 
 `tools/` carries the repository's pinned helper binaries — logging, docs,
 and runner-provisioning tooling — plus one `update.sh` per tool that
-refreshes them. These are **not** the formatters this repository formats
+refreshes them (thin wrappers over the shared
+[`tools/update.sh`](update.md) implementation). These are **not** the formatters this repository formats
 itself with (those are driven by [`format.sh`](../scripts/format.md) via `uv` and
 `pyproject.toml`), and `versioner` itself is **not** bundled here — this
 repository *is* versioner (see the note below).
@@ -26,11 +27,15 @@ tools/<name>/
   `gh`, verifies checksums, stages into a temporary directory, swaps in
   atomically, and deletes superseded version folders only after the new one
   is staged — a failed refresh leaves the previous bundle intact. Each
-  script has `--dry-run`, `--help`, and resolves its own directory, so it
-  can run from anywhere. The committed bundle is binaries only; if an
-  upstream archive carries `LICENSE` (barnacle) or `NOTICE.md`/`LICENSES/`
-  (formattington-lite), `update.sh` copies it into each platform dir,
-  but none are present in the committed pins.
+  bundle's `update.sh` is a thin wrapper exporting per-tool settings
+  (repo slug, binary name, asset filter, which extras to keep, whether a
+  missing checksums file is fatal) and execs the shared
+  [`tools/update.sh`](update.md); each wrapper has `--dry-run`, `--help`,
+  and resolves its own directory, so it can run from anywhere. The
+  committed bundle is binaries only; if an upstream archive carries
+  `LICENSE` (barnacle) or `NOTICE.md`/`LICENSES/` (formattington-lite),
+  `update.sh` copies it into each platform dir, but none are present in
+  the committed pins.
 
 ## The bundles
 
@@ -68,6 +73,7 @@ needed until new releases ship platform-native archives).
 
 ## Related pages
 
+- [update.md](update.md) — the shared implementation behind `tools/update.sh`
 - [scripts/env.md](../scripts/env.md) — how the cascade selects these binaries
 - [scripts/docs.md](../scripts/docs.md) — barnacle in action
 - [README.md — repository layout](../README.md)
