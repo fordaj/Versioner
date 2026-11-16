@@ -34,9 +34,9 @@ is documented here:
   | Tool           | Repo slug               | Pinned version dir                |
   | -------------- | ----------------------- | --------------------------------- |
   | versioner      | `fordaj/Versioner`      | `tools/versioner/v0.0.3.0.5`      |
-  | logamuffin     | `fordaj/logamuffin`     | `tools/logamuffin/v0.1.3.0.35`    |
+  | logamuffin     | `fordaj/logamuffin`     | `tools/logamuffin/v254.1.3.0.48`  |
   | runner-spawner | `fordaj/runner-spawner` | `tools/runner-spawner/v0.0.1.2.6` |
-  | barnacle       | `fordaj/barnacle`       | `tools/barnacle/v0.0.1.0.5`       |
+  | barnacle       | `fordaj/barnacle`       | `tools/barnacle/v254.0.1.1.22`    |
 
   It also carries `VERSIONER_TAG_PATTERN=v[0-9]*` and
   `VERSIONER_CONFIG_FILE=.versioner.json`. Note that

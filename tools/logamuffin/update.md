@@ -11,7 +11,7 @@ fallback when the binary is absent).
 ```text
 tools/logamuffin/
   update.sh                     # refresh from fordaj/logamuffin releases
-  v0.1.3.0.35/
+  v254.1.3.0.48/
     macos-arm64/logamuffin
     macos-x86_64/logamuffin
     linux-arm64/logamuffin
