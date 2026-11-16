@@ -9,6 +9,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -37,7 +38,8 @@ type codedError struct {
 func (e *codedError) Error() string { return e.msg }
 
 func exitCode(err error) int {
-	if ce, ok := err.(*codedError); ok {
+	var ce *codedError
+	if errors.As(err, &ce) {
 		return ce.code
 	}
 	return 1
@@ -137,6 +139,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return nil
 	}
 
+	// --- Configuration layers (defaults < file < env < flags) ---
 	cfg := DefaultConfig()
 
 	// Preliminary repo dir for config discovery: flag > env > default.
@@ -199,7 +202,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 		cfg.Quiet = true
 	}
 
-	// Validate.
+	// --- Validate the resolved config ---
 	if cfg.ExemptBranches == nil {
 		cfg.ExemptBranches = map[string]int{}
 	}
@@ -218,6 +221,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 		cfg.Head = "HEAD"
 	}
 
+	// --- Compute and render ---
 	res, err := Compute(cfg)
 	if err != nil {
 		return computeErrf("%v", err)
@@ -227,6 +231,8 @@ func run(args []string, stdout, stderr io.Writer) error {
 	return nil
 }
 
+// shellSafeRe matches strings that need no shell quoting in `--format shell`
+// output (alphanumerics plus the characters common in git refs/tags).
 var shellSafeRe = regexp.MustCompile(`^[A-Za-z0-9._/:@+-]+$`)
 
 func shellQuote(s string) string {

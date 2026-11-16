@@ -44,14 +44,16 @@ log() {
   # level). Defaults keep `set -u` safe.
   local caller_file="${BASH_SOURCE[1]:-}"
   local caller_line="${BASH_LINENO[0]:-1}"
-  local caller_func=""
-  if ((${#FUNCNAME[@]} > 1)); then
-    caller_func="${FUNCNAME[1]:-}"
+  local caller_func="${FUNCNAME[1]:-}"
+  if [[ ${#FUNCNAME[@]} -le 1 ]]; then
+    caller_func=""
   fi
   if [[ -z "$caller_file" ]]; then
     caller_file="${0:-log}"
   fi
 
+  # Prefer "file:function:line"; fall back to "file:line" at top level
+  # and for the log/main wrappers themselves.
   local src
   if [[ -n "$caller_func" && "$caller_func" != "log" && "$caller_func" != "main" ]]; then
     src="${caller_file}:${caller_func}:${caller_line}"

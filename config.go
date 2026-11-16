@@ -138,6 +138,7 @@ func ParseExemptBranches(s string) (map[string]int, error) {
 			continue
 		}
 		var key, val string
+		// "branch=version" wins when both separators are present.
 		if i := strings.IndexByte(pair, '='); i >= 0 {
 			key, val = pair[:i], pair[i+1:]
 		} else if i := strings.IndexByte(pair, ':'); i >= 0 {

@@ -155,6 +155,7 @@ need_cmd tar
 log INFO "$UPDATE_TOOL_NAME bundle directory: $TOOL_ROOT"
 log INFO "repository: $REPO"
 
+# --- Resolve the release tag (latest, or the pinned --tag/env value). ---
 if [[ -z "$TAG" ]]; then
   TAG="$(gh release view --repo "$REPO" --json tagName -q .tagName)" ||
     die "could not determine latest release from $REPO (is gh authenticated and the repo visible?)"
@@ -165,25 +166,33 @@ if ! [[ "$TAG" =~ ^v[0-9]+(\.[0-9]+)+$ ]]; then
 fi
 log INFO "release tag: $TAG"
 
+# --- Helpers for splitting an archive stem into platform + variant. ---
 # parse_stem_to_platform <stem> sets PLATFORM (e.g.
-# Versioner_v0.0.3.0.5_darwin-arm64 -> macos-arm64) or returns 1 for
-# unknown values. Accepts any single separator before the os-arch suffix and
-# normalizes x64 -> x86_64, amd64 -> x86_64, x86_64 -> x86_64, darwin -> macos.
+# MyTool_v1.2.3.4.5_darwin-arm64 -> macos-arm64) or returns 1 for
+# unknown values. It accepts any single separator before the os-arch
+# suffix and normalizes x64/amd64 -> x86_64 and darwin -> macos.
+# Anything not on the accepted token list falls through to `return 1`.
 parse_stem_to_platform() {
   local stem="$1"
-  if [[ "$stem" =~ [-_](darwin-amd64|darwin-arm64|darwin-x86_64|macos-x86_64|macos-arm64|macos-x64|macos-amd64|linux-x86_64|linux-amd64|linux-x64|linux-arm64|windows-x86_64|windows-amd64|windows-x64|windows-arm64)(-lite|-full)?$ ]]; then
-    case "${BASH_REMATCH[1]}" in
-    darwin-amd64 | darwin-x86_64 | macos-x86_64 | macos-x64 | macos-amd64) PLATFORM="macos-x86_64" ;;
-    darwin-arm64 | macos-arm64) PLATFORM="macos-arm64" ;;
-    linux-x86_64 | linux-amd64 | linux-x64) PLATFORM="linux-x86_64" ;;
-    linux-arm64) PLATFORM="linux-arm64" ;;
-    windows-x86_64 | windows-amd64 | windows-x64) PLATFORM="windows-x86_64" ;;
-    windows-arm64) PLATFORM="windows-arm64" ;;
-    *) return 1 ;;
-    esac
-    return 0
+  # Capture the trailing all-lowercase token (e.g. "darwin-arm64" or
+  # "darwin-arm64-lite"); strip a variant suffix if present.
+  if [[ ! "$stem" =~ [-_]([a-z0-9-]+)$ ]]; then
+    return 1
   fi
-  return 1
+  local token="${BASH_REMATCH[1]}"
+  token="${token%-lite}"
+  token="${token%-full}"
+  # Accepted <os>-<arch> tokens -> bundled platform layout.
+  case "$token" in
+  darwin-amd64 | darwin-x86_64 | macos-x86_64 | macos-x64 | macos-amd64) PLATFORM="macos-x86_64" ;;
+  darwin-arm64 | macos-arm64) PLATFORM="macos-arm64" ;;
+  linux-x86_64 | linux-amd64 | linux-x64) PLATFORM="linux-x86_64" ;;
+  linux-arm64) PLATFORM="linux-arm64" ;;
+  windows-x86_64 | windows-amd64 | windows-x64) PLATFORM="windows-x86_64" ;;
+  windows-arm64) PLATFORM="windows-arm64" ;;
+  *) return 1 ;;
+  esac
+  return 0
 }
 
 strip_archive_ext() {
@@ -203,6 +212,7 @@ keep_archive() {
   return 0
 }
 
+# --- Dry run: resolve the tag and report, then change nothing. ---
 if [[ "$DRY_RUN" -eq 1 ]]; then
   log INFO "DRY RUN: no download, extraction, or deletion will happen"
   log INFO "release $TAG assets:"
@@ -271,6 +281,7 @@ STAGE_DIR="$(mktemp -d "$TOOL_ROOT/.tmp.XXXXXX")"
 log INFO "downloading $TAG assets from $REPO..."
 gh release download "$TAG" --repo "$REPO" --dir "$TMP_DIR" --pattern '*.tar.gz' --pattern '*.zip' --pattern '*.7z' --pattern 'checksums.txt' --pattern 'SHA256SUMS.txt' --clobber
 
+# --- Download, verify and stage the new bundle in a temp directory. ---
 shopt -s nullglob
 archives=()
 for archive in "$TMP_DIR"/*.tar.gz "$TMP_DIR"/*.zip "$TMP_DIR"/*.7z; do
@@ -291,27 +302,35 @@ for candidate in checksums.txt SHA256SUMS.txt; do
     break
   fi
 done
-if [[ -n "$checksums_file" ]]; then
-  log INFO "verifying checksums ($(basename "$checksums_file"))..."
-  # The checksums file may be cumulative across releases (or list every
-  # uploaded asset), so verify only the archives downloaded for this run.
-  checksum_tool=""
-  if command -v shasum >/dev/null 2>&1; then
-    checksum_tool="shasum -a 256"
-  elif command -v sha256sum >/dev/null 2>&1; then
-    checksum_tool="sha256sum"
+# verify_checksums <checksums-file> <archive>... — check only the given
+# archives against <checksums-file> (it may be cumulative across
+# releases, or list every uploaded asset).
+verify_checksums() {
+  local checksums_file="$1"
+  shift
+  local verify_list="$TMP_DIR/.verify-list"
+  local archive base
+  if ! command -v shasum >/dev/null 2>&1 && ! command -v sha256sum >/dev/null 2>&1; then
+    die "checksums file present but neither shasum nor sha256sum found"
   fi
-  [[ -n "$checksum_tool" ]] || die "checksums file present but neither shasum nor sha256sum found"
-  verify_list="$TMP_DIR/.verify-list"
   : >"$verify_list"
-  for archive in "${archives[@]}"; do
+  for archive in "$@"; do
     base="$(basename "$archive")"
     grep -F " $base" "$checksums_file" >>"$verify_list" ||
       die "no checksum entry for downloaded asset $base in $(basename "$checksums_file")"
   done
   # Entries are "<sha>  <name>" (or with a leading *), relative to $TMP_DIR.
-  (cd "$TMP_DIR" && $checksum_tool -c "$verify_list") || die "checksum verification failed for $TAG"
+  if command -v shasum >/dev/null 2>&1; then
+    (cd "$TMP_DIR" && shasum -a 256 -c "$verify_list") || die "checksum verification failed for $TAG"
+  else
+    (cd "$TMP_DIR" && sha256sum -c "$verify_list") || die "checksum verification failed for $TAG"
+  fi
   log INFO "checksums verified"
+}
+
+if [[ -n "$checksums_file" ]]; then
+  log INFO "verifying checksums ($(basename "$checksums_file"))..."
+  verify_checksums "$checksums_file" "${archives[@]}"
 elif [[ "$UPDATE_REQUIRE_CHECKSUMS" == "1" ]]; then
   die "no checksums.txt/SHA256SUMS.txt in $TAG release; refusing to install unverified binaries"
 else
@@ -389,6 +408,7 @@ for archive in "${archives[@]}"; do
   rm -rf -- "$extract_dir"
 done
 
+# --- Swap the staged bundle in and drop superseded version folders. ---
 TAG_DIR="$TOOL_ROOT/$TAG"
 rm -rf -- "$TAG_DIR"
 mkdir -p "$TOOL_ROOT"
