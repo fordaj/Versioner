@@ -60,6 +60,11 @@ done
 REPO_DIR="${VERSIONER_REPO_DIR:-${REPO_ROOT_DIR:-$SCRIPT_DIR/..}}"
 REPO_DIR="$(cd -- "$REPO_DIR" && pwd)"
 
+# Print the last VALUE=<value> line's value from versioner's text output.
+extract_value() {
+  printf '%s\n' "$1" | sed -n "s/^$2=//p" | tail -1
+}
+
 VERSIONER_CMD=("$VERSIONER_BIN")
 if [[ -z "${VERSIONER_BIN:-}" || ! -x "${VERSIONER_BIN:-}" ]]; then
   if command -v go >/dev/null 2>&1; then
@@ -77,8 +82,8 @@ fi
 
 OUTPUT="$(cd "$REPO_DIR" && "${VERSIONER_CMD[@]}" --repo-dir "$REPO_DIR" --quiet)"
 
-VERSION="$(printf '%s\n' "$OUTPUT" | sed -n 's/^VERSION=//p' | tail -1)"
-TAG="$(printf '%s\n' "$OUTPUT" | sed -n 's/^TAG=//p' | tail -1)"
+VERSION="$(extract_value "$OUTPUT" VERSION)"
+TAG="$(extract_value "$OUTPUT" TAG)"
 
 [[ -n "$VERSION" ]] || {
   log ERROR "could not parse VERSION from the versioner output"

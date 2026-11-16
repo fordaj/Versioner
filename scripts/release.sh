@@ -65,8 +65,16 @@ die() {
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"
 }
+# extract_value <versioner-output> <key> — print the last VALUE=<value>
+# line's value from versioner's text output (LAST_TAG/VERSION/TAG style).
+extract_value() {
+  printf '%s\n' "$1" | sed -n "s/^$2=//p" | tail -1
+}
 
 for cmd in git go make tar zip; do need_cmd "$cmd"; done
+
+# Basename used for the release archives and their checksums file.
+ARCHIVE_PREFIX="Versioner"
 
 if [[ "$DRY_RUN" -ne 1 ]]; then
   need_cmd gh
@@ -80,10 +88,10 @@ if ! REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"; then
 fi
 cd "$REPO_ROOT"
 
-RANCH="$(git rev-parse --abbrev-ref HEAD)"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 HEAD_SHORT="$(git rev-parse --short HEAD)"
 log "repo: $REPO_ROOT"
-log "branch: $RANCH  HEAD: $HEAD_SHORT"
+log "branch: $BRANCH  HEAD: $HEAD_SHORT"
 if [[ "$DRY_RUN" -eq 1 ]]; then
   log "DRY RUN: no tag/push/release will happen"
 fi
@@ -126,8 +134,8 @@ VERSION_OUT="$("$DOGFOOD_BIN" --repo-dir "$REPO_ROOT")"
 log "versioner output:"
 printf '%s\n' "$VERSION_OUT" | sed 's/^/release.sh:   /'
 
-VERSION="$(printf '%s\n' "$VERSION_OUT" | sed -n 's/^VERSION=//p' | tail -1)"
-TAG="$(printf '%s\n' "$VERSION_OUT" | sed -n 's/^TAG=//p' | tail -1)"
+VERSION="$(extract_value "$VERSION_OUT" VERSION)"
+TAG="$(extract_value "$VERSION_OUT" TAG)"
 [[ -n "$VERSION" ]] || die "could not parse VERSION from versioner output"
 [[ -n "$TAG" ]] || die "could not parse TAG from versioner output"
 if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -195,14 +203,14 @@ for d in "${arch_dirs[@]}"; do
   bin_name="$(basename "$bin")"
   case "$arch" in
   windows-*)
-    archive="dist/Versioner_${TAG}_${arch}.zip"
+    archive="dist/${ARCHIVE_PREFIX}_${TAG}_${arch}.zip"
     rm -f "$archive"
-    (cd "$d" && zip -q -j "../Versioner_${TAG}_${arch}.zip" "$bin_name" README.md LICENSE)
+    (cd "$d" && zip -q -j "../${ARCHIVE_PREFIX}_${TAG}_${arch}.zip" "$bin_name" README.md LICENSE)
     ;;
   *)
-    archive="dist/Versioner_${TAG}_${arch}.tar.gz"
+    archive="dist/${ARCHIVE_PREFIX}_${TAG}_${arch}.tar.gz"
     rm -f "$archive"
-    (cd "$d" && tar -czf "../Versioner_${TAG}_${arch}.tar.gz" "$bin_name" README.md LICENSE)
+    (cd "$d" && tar -czf "../${ARCHIVE_PREFIX}_${TAG}_${arch}.tar.gz" "$bin_name" README.md LICENSE)
     ;;
   esac
   [[ -s "$archive" ]] || die "failed to create $archive"
@@ -217,9 +225,9 @@ done
 # Checksums of the release archives (portable shasum; sha256sum fallback).
 log "generating checksums..."
 if command -v shasum >/dev/null 2>&1; then
-  (cd dist && shasum -a 256 Versioner_* >checksums.txt)
+  (cd dist && shasum -a 256 "${ARCHIVE_PREFIX}"_* >checksums.txt)
 elif command -v sha256sum >/dev/null 2>&1; then
-  (cd dist && sha256sum Versioner_* >checksums.txt)
+  (cd dist && sha256sum "${ARCHIVE_PREFIX}"_* >checksums.txt)
 else
   die "neither shasum nor sha256sum found (need one for checksums)"
 fi
@@ -230,7 +238,7 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
   log "DRY RUN: would run:"
   log "  git tag -a $TAG -m \"versioner $TAG\""
   log "  git push origin $TAG"
-  log "  gh release create $TAG --title \"versioner $TAG\" --generate-notes dist/Versioner_* dist/checksums.txt"
+  log "  gh release create $TAG --title \"versioner $TAG\" --generate-notes dist/${ARCHIVE_PREFIX}_* dist/checksums.txt"
   log "dry run complete: VERSION=$VERSION TAG=$TAG"
   exit 0
 fi
@@ -242,7 +250,7 @@ log "pushing tag $TAG..."
 git push origin "$TAG"
 
 if gh release view "$TAG" >/dev/null 2>&1; then
-  die "GitHub release $TAG already exists (tag was pushed; upload assets manually with: gh release upload $TAG dist/Versioner_* dist/checksums.txt --clobber)"
+  die "GitHub release $TAG already exists (tag was pushed; upload assets manually with: gh release upload $TAG dist/${ARCHIVE_PREFIX}_* dist/checksums.txt --clobber)"
 fi
 
 log "creating GitHub release $TAG with ${#archives[@]} archives + checksums..."

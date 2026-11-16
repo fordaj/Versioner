@@ -23,6 +23,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"regexp"
@@ -143,13 +144,17 @@ var gitRun = func(dir string, args ...string) (string, error) {
 	cmd := exec.Command("git", full...)
 	out, err := cmd.Output()
 	if err != nil {
-		if ee, ok := err.(*exec.ExitError); ok {
-			return "", fmt.Errorf("git %s: %w: %s", strings.Join(args, " "), err, strings.TrimSpace(string(ee.Stderr)))
+		joined := strings.Join(args, " ")
+		var exitErr *exec.ExitError
+		var execErr *exec.Error
+		switch {
+		case errors.As(err, &exitErr):
+			return "", fmt.Errorf("git %s: %w: %s", joined, err, strings.TrimSpace(string(exitErr.Stderr)))
+		case errors.As(err, &execErr):
+			return "", fmt.Errorf("git %s: %w", joined, execErr.Err)
+		default:
+			return "", fmt.Errorf("git %s: %w", joined, err)
 		}
-		if ee, ok := err.(*exec.Error); ok {
-			return "", fmt.Errorf("git %s: %w", strings.Join(args, " "), ee.Err)
-		}
-		return "", fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
 	}
 	return strings.TrimSpace(string(out)), nil
 }
