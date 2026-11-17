@@ -20,7 +20,7 @@ repository into a static, navigable HTML site. Versioner uses it to render
 ```text
 tools/barnacle/
   update.sh                     # refresh from fordaj/barnacle releases
-  v0.0.1.0.17/
+  v0.0.2.1.25/
     macos-arm64/barnacle
     macos-x86_64/barnacle
     linux-arm64/barnacle
@@ -40,7 +40,7 @@ Barnacle's settings: repository `fordaj/barnacle`, binary `barnacle`,
 tag override `BARNACLE_TAG`, slug override `BARNACLE_REPO`, every
 platform archive installed (no suffix filter), `LICENSE` copied next to
 each binary when the archive carries one (none is present in the
-committed `v0.0.1.0.17`), missing checksums file is a warning (not fatal).
+committed `v0.0.2.1.25`), missing checksums file is a warning (not fatal).
 
 `--dry-run` lists assets without touching anything; `--help` prints
 usage. The script sources [`scripts/entry.sh`](../../scripts/entry.sh.md) for

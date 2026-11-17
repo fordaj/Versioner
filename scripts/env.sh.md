@@ -46,7 +46,7 @@ is documented here:
   | versioner      | `fordaj/Versioner`      | `tools/versioner/v0.0.3.0.5`      |
   | logamuffin     | `fordaj/logamuffin`     | `tools/logamuffin/v254.1.3.0.48`  |
   | runner-spawner | `fordaj/runner-spawner` | `tools/runner-spawner/v0.0.1.2.6` |
-  | barnacle       | `fordaj/barnacle`       | `tools/barnacle/v0.0.1.0.17`      |
+  | barnacle       | `fordaj/barnacle`       | `tools/barnacle/v0.0.2.1.25`      |
 
   It also carries `VERSIONER_TAG_PATTERN=v[0-9]*` and
   `VERSIONER_CONFIG_FILE=.versioner.json`. Note that
