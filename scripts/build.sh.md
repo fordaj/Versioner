@@ -2,15 +2,21 @@
 
 ```mermaid
 flowchart TD
-    Entry["entry.sh<br/>log + cascade"] --> Env["env: *_BIN anchored absolute"]
-    Shell["version.sh --format shell"] --> Eval["eval to VERSION"]
-    Env --> Go["go build CGO_ENABLED=0 -trimpath"]
-    Eval --> Ldflags["-ldflags -s -w -X main.toolVersion=VERSION"]
+    Entry("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>entry.sh<br/>log + cascade</u>") --> Env("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>env: *_BIN anchored absolute</u>")
+    Shell("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>version.sh --format shell</u>") --> Eval("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>eval to VERSION")
+    Env --> Go("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>go build CGO_ENABLED=0 -trimpath")
+    Eval --> Ldflags("<img src='barnacle:hammer.svg' width='20' alt=''/><br/>-ldflags -s -w -X main.toolVersion=VERSION")
     Go --> Ldflags
-    Ldflags --> Dist["dist platform dirs<br/>versioner (.exe on Windows), 5 targets"]
+    Ldflags --> Dist("<img src='barnacle:folder.svg' width='20' alt=''/><br/>dist platform dirs<br/>versioner (.exe on Windows), 5 targets")
     click Entry href "entry.sh.md"
     click Env href "env.sh.md"
     click Shell href "version.sh.md"
+    class Entry,Env,Shell,Eval shFile
+    class Go goFile
+    class Dist folder
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 Cross-compiles `versioner` for the release target matrix and stamps the

@@ -2,12 +2,16 @@
 
 ```mermaid
 flowchart TD
-    Env["scripts/env.sh<br/>sourced, never executed"] --> Locate["locate cascade:<br/>BASH_SOURCE or ZSH_VERSION"]
-    Locate --> Common["source .common.env<br/>TOOLS_DIR, upstream repos, pins"]
-    Common --> Plat["source platform .env<br/>selected by uname"]
-    Plat --> Anchor["anchor VERSIONER_BIN, LOGAMUFFIN_BIN,<br/>RUNNER_SPAWNER_BIN, BARNACLE_BIN"]
-    Anchor --> Out["absolute *_BIN for child processes"]
+    Env("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>scripts/env.sh<br/>sourced, never executed</u>") --> Locate("<img src='barnacle:locate-fixed.svg' width='20' alt=''/><br/>locate cascade:<br/>BASH_SOURCE or ZSH_VERSION")
+    Locate --> Common("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>source .common.env<br/>TOOLS_DIR, upstream repos, pins")
+    Common --> Plat("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>source platform .env<br/>selected by uname")
+    Plat --> Anchor("<img src='barnacle:anchor.svg' width='20' alt=''/><br/>anchor VERSIONER_BIN, LOGAMUFFIN_BIN,<br/>RUNNER_SPAWNER_BIN, BARNACLE_BIN")
+    Anchor --> Out("<img src='barnacle:check.svg' width='20' alt=''/><br/>absolute *_BIN for child processes")
     click Env href "entry.sh.md"
+    class Env,Common,Plat shFile
+    class Out checkNode
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
 ```
 
 `scripts/env.sh` is the plumbing that makes the pinned helper tools
@@ -46,7 +50,7 @@ is documented here:
   | versioner      | `fordaj/Versioner`      | `tools/versioner/v0.0.3.0.5`      |
   | logamuffin     | `fordaj/logamuffin`     | `tools/logamuffin/v254.1.3.0.48`  |
   | runner-spawner | `fordaj/runner-spawner` | `tools/runner-spawner/v0.0.1.2.6` |
-  | barnacle       | `fordaj/barnacle`       | `tools/barnacle/v0.0.1.0.17`      |
+  | barnacle       | `fordaj/barnacle`       | `tools/barnacle/v0.0.2.1.25`      |
 
   It also carries `VERSIONER_TAG_PATTERN=v[0-9]*` and
   `VERSIONER_CONFIG_FILE=.versioner.json`. Note that

@@ -2,11 +2,17 @@
 
 ```mermaid
 flowchart LR
-    Edit[Edit source] --> Doc[Update sibling .md<br/>in the same change]
-    Doc -->|<a href="scripts/docs.sh.md">regenerate site</a>| Regen[scripts/docs.sh<br/>source to site]
-    Regen --> Site[./site — git-ignored]
-    Site --> Commit[Commit source and doc together]
+    Edit("<img src='barnacle:pencil.svg' width='20' alt=''/><br/>Edit source") --> Doc("<img src='barnacle:file-text.svg' width='20' alt=''/><br/>Update sibling .md<br/>in the same change")
+    Doc -->|<a href="scripts/docs.sh.md">regenerate site</a>| Regen("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>scripts/docs.sh<br/>source to site</u>")
+    Regen --> Site("<img src='barnacle:folder.svg' width='20' alt=''/><br/>./site — git-ignored")
+    Site --> Commit("<img src='barnacle:git-commit-horizontal.svg' width='20' alt=''/><br/>Commit source and doc together")
     click Regen href "scripts/docs.sh.md"
+    class Doc mdFile
+    class Regen shFile
+    class Site folder
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 Instructions for AI coding agents working in this repo.

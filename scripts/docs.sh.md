@@ -2,11 +2,15 @@
 
 ```mermaid
 flowchart LR
-    Env["env.sh cascade<br/>BARNACLE_BIN"] --> Script["scripts/docs.sh"]
-    Script --> Barnacle["pinned barnacle<br/>tools/barnacle, not rendered"]
-    Barnacle --> Scan["scans .md/.mmd,<br/>rewrites doc links to .html"]
-    Scan --> Site["./site/<br/>static HTML, git-ignored"]
+    Env("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>env.sh cascade<br/>BARNACLE_BIN</u>") --> Script("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>scripts/docs.sh")
+    Script --> Barnacle("<img src='barnacle:anchor.svg' width='20' alt=''/><br/>pinned barnacle<br/>tools/barnacle, not rendered")
+    Barnacle --> Scan("<img src='barnacle:scan-search.svg' width='20' alt=''/><br/>scans .md/.mmd,<br/>rewrites doc links to .html")
+    Scan --> Site("<img src='barnacle:app-window.svg' width='20' alt=''/><br/>./site/<br/>static HTML, git-ignored")
     click Env href "env.sh.md"
+    class Env,Script shFile
+    class Site htmlFile
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef htmlFile fill:#ffc48a,stroke:#c2410c,color:#431407
 ```
 
 Generates the documentation site you are reading: it runs the pinned

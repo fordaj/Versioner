@@ -2,13 +2,17 @@
 
 ```mermaid
 flowchart TD
-    Defaults["DefaultConfig<br/>repoDir ., head HEAD, tagPattern v[0-9]*"] --> File["LoadFile<br/>.versioner.json"]
-    File --> Env["ApplyEnv<br/>VERSIONER_*"]
-    Env --> Flags["flag overlay<br/>explicit values only"]
-    Flags --> Cfg[Config]
-    Cfg --> Compute["Compute consumes it<br/>version.go.md"]
+    Defaults("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>DefaultConfig<br/>repoDir ., head HEAD, tagPattern v[0-9]*") --> File("<img src='barnacle:braces.svg' width='20' alt=''/><br/>LoadFile<br/>.versioner.json")
+    File --> Env("<img src='barnacle:variable.svg' width='20' alt=''/><br/>ApplyEnv<br/>VERSIONER_*")
+    Env --> Flags("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>flag overlay<br/>explicit values only</u>")
+    Flags --> Cfg("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>Config")
+    Cfg --> Compute("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Compute consumes it<br/>version.go.md</u>")
     click Flags href "main.go.md"
     click Compute href "version.go.md"
+    class Defaults,Flags,Cfg,Compute goFile
+    class File jsonFile
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef jsonFile fill:#cdb9f7,stroke:#6d28d9,color:#2e1065
 ```
 
 `config.go` defines every tunable of the `versioner` CLI and the layering

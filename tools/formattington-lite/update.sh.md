@@ -2,12 +2,20 @@
 
 ```mermaid
 flowchart TD
-    Tag["resolve tag: latest via gh<br/>(or --tag / FORMATTINGTON_TAG)"] --> DL["gh release download<br/>archives + checksums"]
-    DL --> Filter["keep -lite assets only<br/>(the one discriminating bundle)"]
-    Filter --> Extract["extract; normalize platform names<br/>darwin-amd64 to macos-x86_64"]
-    Extract --> Swap["swap v_tag/ dir, delete superseded,<br/>smoke test formattington --version"]
-    Swap --> Done["bundle refreshed; this repo formats<br/>via format.sh + uv, not this binary"]
+    Tag("<img src='barnacle:tag.svg' width='20' alt=''/><br/>resolve tag: latest via gh<br/>(or --tag / FORMATTINGTON_TAG)") --> DL("<img src='barnacle:download.svg' width='20' alt=''/><br/>gh release download<br/>archives + checksums")
+    DL --> Filter("<img src='barnacle:funnel.svg' width='20' alt=''/><br/>keep -lite assets only<br/>(the one discriminating bundle)")
+    Filter --> Extract("<img src='barnacle:package-open.svg' width='20' alt=''/><br/>extract; normalize platform names<br/>darwin-amd64 to macos-x86_64")
+    Extract --> Swap("<img src='barnacle:folder-sync.svg' width='20' alt=''/><br/>swap v_tag/ dir, delete superseded,<br/>smoke test formattington --version")
+    Swap --> Done("<img src='barnacle:paintbrush.svg' width='20' alt=''/><br/><u>bundle refreshed; this repo formats<br/>via format.sh + uv, not this binary</u>")
     click Done href "../../scripts/format.sh.md"
+    class Tag tagNode
+    class DL dlNode
+    class Extract boxNode
+    class Swap folder
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef dlNode fill:#93e2e2,stroke:#0f766e,color:#042f2e
+    classDef boxNode fill:#e8cf9d,stroke:#a16207,color:#33240a
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 [Formattington](https://github.com/fordaj/formattington) is a formatting
