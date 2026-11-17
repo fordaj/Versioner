@@ -2,16 +2,20 @@
 
 ```mermaid
 flowchart LR
-    Common["scripts/.common.env<br/>pins *_VERSION_DIR"] --> Barnacle["barnacle<br/>docs site"]
-    Common --> Logu["logamuffin<br/>log() backend"]
-    Common --> Rs["runner-spawner<br/>self-hosted CI"]
-    Common --> Fml["formattington-lite<br/>pinned, not wired in"]
-    GH["fordaj/* GitHub releases"] --> Update["update.sh per tool<br/>verify, stage, swap"]
+    Common("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>scripts/.common.env<br/>pins *_VERSION_DIR") --> Barnacle("<img src='barnacle:anchor.svg' width='20' alt=''/><br/><u>barnacle<br/>docs site</u>")
+    Common --> Logu("<img src='barnacle:logs.svg' width='20' alt=''/><br/><u>logamuffin<br/>log() backend</u>")
+    Common --> Rs("<img src='barnacle:server.svg' width='20' alt=''/><br/><u>runner-spawner<br/>self-hosted CI</u>")
+    Common --> Fml("<img src='barnacle:paintbrush.svg' width='20' alt=''/><br/><u>formattington-lite<br/>pinned, not wired in</u>")
+    GH("<img src='barnacle:tag.svg' width='20' alt=''/><br/>fordaj/* GitHub releases") --> Update("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>update.sh per tool<br/>verify, stage, swap")
     Update --> Common
     click Barnacle href "barnacle/update.sh.md"
     click Logu href "logamuffin/update.sh.md"
     click Rs href "runner-spawner/update.sh.md"
     click Fml href "formattington-lite/update.sh.md"
+    class Common,Update shFile
+    class GH tagNode
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
 ```
 
 `tools/` carries the repository's pinned helper binaries — logging, docs,

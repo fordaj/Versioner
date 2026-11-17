@@ -2,14 +2,14 @@
 
 ```mermaid
 flowchart TD
-    Entry["entry.sh<br/>sources cascade, defines log()"] --> Env["env.sh<br/>anchors *_BIN absolute"]
-    Env --> Common[".common.env<br/>TOOLS_DIR, upstream repos, pins"]
-    Env --> Plat["platform .env file<br/>PROJECT_PLATFORM, *_BIN"]
-    Entry --> Version["version.sh.md"]
-    Entry --> Build["build.sh.md"]
-    Entry --> Docs["docs.sh.md"]
-    Entry --> Format["format.sh.md"]
-    Release["release.sh.md<br/>self-contained, does not source entry.sh"]
+    Entry("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>entry.sh<br/>sources cascade, defines log()</u>") --> Env("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>env.sh<br/>anchors *_BIN absolute</u>")
+    Env --> Common("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.common.env<br/>TOOLS_DIR, upstream repos, pins")
+    Env --> Plat("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>platform .env file<br/>PROJECT_PLATFORM, *_BIN")
+    Entry --> Version("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>version.sh.md</u>")
+    Entry --> Build("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>build.sh.md</u>")
+    Entry --> Docs("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>docs.sh.md</u>")
+    Entry --> Format("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>format.sh.md</u>")
+    Release("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>release.sh.md<br/>self-contained, does not source entry.sh</u>")
     click Entry href "entry.sh.md"
     click Env href "env.sh.md"
     click Version href "version.sh.md"
@@ -17,6 +17,8 @@ flowchart TD
     click Docs href "docs.sh.md"
     click Format href "format.sh.md"
     click Release href "release.sh.md"
+    class Entry,Env,Common,Plat,Version,Build,Docs,Format,Release shFile
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
 ```
 
 The `scripts/` directory carries the repository's build/release/docs/version

@@ -2,15 +2,19 @@
 
 ```mermaid
 flowchart TD
-    Cfg["Config (see config.go.md)"] --> Tag{"git describe --tags --match"}
-    Tag -- "tag found" --> Seed["seed major, minor, revision from tag;<br/>patch = rev-list tag --count"]
-    Tag -- "no tag" --> Base["base 0.0.0.0"]
-    Seed --> Branch["branch version: exempt map else default (254)"]
+    Cfg("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Config (see config.go.md)</u>") --> Tag{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>git describe --tags --match"}}
+    Tag -- "tag found" --> Seed("<img src='barnacle:sprout.svg' width='20' alt=''/><br/>seed major, minor, revision from tag;<br/>patch = rev-list tag --count")
+    Tag -- "no tag" --> Base("<img src='barnacle:circle-dot.svg' width='20' alt=''/><br/>base 0.0.0.0")
+    Seed --> Branch("<img src='barnacle:git-branch.svg' width='20' alt=''/><br/>branch version: exempt map else default (254)")
     Base --> Branch
-    Branch --> Replay["replay commits after tag (or all), oldest first;<br/>every commit bumps patch"]
-    Replay --> Result["Result: LastTag, Version, Trace<br/>rendered by main.go.md"]
+    Branch --> Replay("<img src='barnacle:rotate-ccw.svg' width='20' alt=''/><br/>replay commits after tag (or all), oldest first;<br/>every commit bumps patch")
+    Replay --> Result("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Result: LastTag, Version, Trace<br/>rendered by main.go.md</u>")
     click Cfg href "config.go.md"
     click Result href "main.go.md"
+    class Cfg,Result goFile
+    class Tag hexNode
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
 ```
 
 `version.go` holds the pure version rules and the git plumbing behind

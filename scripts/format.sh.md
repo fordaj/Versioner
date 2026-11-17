@@ -2,12 +2,14 @@
 
 ```mermaid
 flowchart LR
-    Local["./scripts/format.sh"] --> UV["uv run formattington<br/>--config .formattington.json"]
-    UV --> Run["prettier, gofmt + goimports,<br/>shfmt -i 2, taplo"]
-    Run --> Files["repository files<br/>formatted in place"]
-    CI["ci/format_check.sh<br/>check only, no writes"] --> Run
+    Local("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>./scripts/format.sh</u>") --> UV("<img src='barnacle:play.svg' width='20' alt=''/><br/>uv run formattington<br/>--config .formattington.json")
+    UV --> Run("<img src='barnacle:paintbrush.svg' width='20' alt=''/><br/>prettier, gofmt + goimports,<br/>shfmt -i 2, taplo")
+    Run --> Files("<img src='barnacle:files.svg' width='20' alt=''/><br/>repository files<br/>formatted in place")
+    CI("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>ci/format_check.sh<br/>check only, no writes</u>") --> Run
     click Local href "README.md"
     click CI href "../README.md"
+    class Local,CI shFile
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
 ```
 
 `scripts/format.sh` formats this repository in place using

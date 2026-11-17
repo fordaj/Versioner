@@ -2,16 +2,30 @@
 
 ```mermaid
 flowchart TD
-    Pre["prerequisites: git go make tar zip<br/>(gh for a real release); clean tree"] --> Throwaway["build throwaway versioner<br/>in a mktemp dir"]
-    Throwaway --> Compute["compute VERSION and TAG"]
-    Compute --> Guard{"tag exists locally or on origin?"}
-    Guard -- "no" --> Cross["VERSION=TAG make cross<br/>5 targets, stamps TAG"]
-    Guard -- "yes" --> Die["abort; add a feat/fix commit"]
-    Cross --> Stage["stage README and LICENSE<br/>next to each binary"]
-    Stage --> Pack["pack dist archives<br/>+ checksums.txt"]
-    Pack --> Ship["annotated tag, push,<br/>gh release create"]
+    Pre("<img src='barnacle:check.svg' width='20' alt=''/><br/>prerequisites: git go make tar zip<br/>(gh for a real release); clean tree") --> Throwaway("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>build throwaway versioner<br/>in a mktemp dir")
+    Throwaway --> Compute("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>compute VERSION and TAG</u>")
+    Compute --> Guard{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>tag exists locally or on origin?"}}
+    Guard -- "no" --> Cross("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>VERSION=TAG make cross<br/>5 targets, stamps TAG</u>")
+    Guard -- "yes" --> Die("<img src='barnacle:circle-exclamation-point.svg' width='20' alt=''/><br/>abort; add a feat/fix commit")
+    Cross --> Stage("<img src='barnacle:copy.svg' width='20' alt=''/><br/>stage README and LICENSE<br/>next to each binary")
+    Stage --> Pack("<img src='barnacle:package.svg' width='20' alt=''/><br/>pack dist archives<br/>+ checksums.txt")
+    Pack --> Ship("<img src='barnacle:tag.svg' width='20' alt=''/><br/>annotated tag, push,<br/>gh release create")
     click Compute href "../version.go.md"
     click Cross href "build.sh.md"
+    class Pre checkNode
+    class Throwaway,Compute goFile
+    class Cross shFile
+    class Guard hexNode
+    class Die errNode
+    class Pack boxNode
+    class Ship tagNode
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef errNode fill:#f6b8b8,stroke:#b91c1c,color:#450a0a
+    classDef boxNode fill:#e8cf9d,stroke:#a16207,color:#33240a
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
 ```
 
 Cuts a release by **dogfooding** `versioner`: it builds `versioner` from

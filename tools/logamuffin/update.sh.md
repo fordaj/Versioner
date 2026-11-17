@@ -2,12 +2,22 @@
 
 ```mermaid
 flowchart TD
-    Tag["resolve tag: latest via gh<br/>(or --tag / LOGAMUFFIN_TAG)"] --> DL["gh release download<br/>archives + checksums"]
-    DL --> Verify["sha256 verify when present;<br/>warn and skip otherwise"]
-    Verify --> Extract["extract; normalize platform names<br/>darwin-amd64 to macos-x86_64"]
-    Extract --> Swap["swap v_tag/ dir, delete superseded,<br/>smoke test logamuffin --version"]
-    Swap --> Done["LOGAMUFFIN_BIN feeds log()<br/>in scripts/entry.sh"]
+    Tag("<img src='barnacle:tag.svg' width='20' alt=''/><br/>resolve tag: latest via gh<br/>(or --tag / LOGAMUFFIN_TAG)") --> DL("<img src='barnacle:download.svg' width='20' alt=''/><br/>gh release download<br/>archives + checksums")
+    DL --> Verify("<img src='barnacle:check.svg' width='20' alt=''/><br/>sha256 verify when present;<br/>warn and skip otherwise")
+    Verify --> Extract("<img src='barnacle:package-open.svg' width='20' alt=''/><br/>extract; normalize platform names<br/>darwin-amd64 to macos-x86_64")
+    Extract --> Swap("<img src='barnacle:folder-sync.svg' width='20' alt=''/><br/>swap v_tag/ dir, delete superseded,<br/>smoke test logamuffin --version")
+    Swap --> Done("<img src='barnacle:logs.svg' width='20' alt=''/><br/><u>LOGAMUFFIN_BIN feeds log()<br/>in scripts/entry.sh</u>")
     click Done href "../../scripts/entry.sh.md"
+    class Tag tagNode
+    class DL dlNode
+    class Verify checkNode
+    class Extract boxNode
+    class Swap folder
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef dlNode fill:#93e2e2,stroke:#0f766e,color:#042f2e
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef boxNode fill:#e8cf9d,stroke:#a16207,color:#33240a
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 [Logamuffin](https://github.com/fordaj/logamuffin) is the structured

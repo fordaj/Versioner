@@ -2,15 +2,21 @@
 
 ```mermaid
 flowchart TD
-    Script["scripts/version.sh"] --> Set{"VERSIONER_BIN set and executable?"}
-    Set -- "yes" --> Bin["run VERSIONER_BIN"]
-    Set -- "no" --> Go["go run . (this repo IS versioner)"]
-    Bin --> Quiet["--repo-dir DIR --quiet"]
+    Script("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>scripts/version.sh") --> Set{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>VERSIONER_BIN set and executable?"}}
+    Set -- "yes" --> Bin("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>run VERSIONER_BIN</u>")
+    Set -- "no" --> Go("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>go run . (this repo IS versioner)</u>")
+    Bin --> Quiet("<img src='barnacle:flag.svg' width='20' alt=''/><br/>--repo-dir DIR --quiet")
     Go --> Quiet
-    Quiet --> Parse["sed-parse VERSION= and TAG="]
-    Parse --> Out["text / shell / json"]
+    Quiet --> Parse("<img src='barnacle:regex.svg' width='20' alt=''/><br/>sed-parse VERSION= and TAG=")
+    Parse --> Out("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>text / shell / json")
     click Go href "../version.go.md"
     click Bin href "env.sh.md"
+    class Script,Out shFile
+    class Set hexNode
+    class Bin,Go goFile
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
 Prints the version of this repository as computed by `versioner` — the same

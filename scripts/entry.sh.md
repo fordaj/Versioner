@@ -2,13 +2,17 @@
 
 ```mermaid
 flowchart TD
-    Scripts["repo scripts and tools/*/update.sh"] --> Entry["entry.sh"]
-    Entry --> Env["sources env.sh via \$ENTRY_DIR"]
-    Entry --> Log["defines log LEVEL MESSAGE..."]
-    Log --> HasBin{"LOGAMUFFIN_BIN executable?"}
-    HasBin -- "yes" --> La["logamuffin binary<br/>LOG_SOURCE passed through"]
-    HasBin -- "no" --> Printf["printf fallback<br/>same call shape"]
+    Scripts("<img src='barnacle:files.svg' width='20' alt=''/><br/>repo scripts and tools/*/update.sh") --> Entry("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>entry.sh")
+    Entry --> Env("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>sources env.sh via $ENTRY_DIR</u>")
+    Entry --> Log("<img src='barnacle:logs.svg' width='20' alt=''/><br/>defines log LEVEL MESSAGE...")
+    Log --> HasBin{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>LOGAMUFFIN_BIN executable?"}}
+    HasBin -- "yes" --> La("<img src='barnacle:logs.svg' width='20' alt=''/><br/>logamuffin binary<br/>LOG_SOURCE passed through")
+    HasBin -- "no" --> Printf("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>printf fallback<br/>same call shape")
     click Env href "env.sh.md"
+    class Entry,Env,Printf shFile
+    class HasBin hexNode
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
 ```
 
 Every repository script (except [release.sh.md](release.sh.md), which is

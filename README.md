@@ -2,16 +2,20 @@
 
 ```mermaid
 flowchart LR
-    Git[git history<br/>describe --tags, commit log] --> Compute[Compute<br/>version.go.md]
-    Cfg[Config layering<br/>config.go.md] --> Compute
-    CLI[CLI wiring<br/>main.go.md] --> Compute
-    Compute --> Text[text output<br/>LAST_TAG / VERSION / TAG]
-    Compute --> Fmt[shell and json formats]
-    CLI --> Release[release pipeline<br/>scripts/release.sh.md]
+    Git("<img src='barnacle:git-branch.svg' width='20' alt=''/><br/>git history<br/>describe --tags, commit log") --> Compute("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Compute<br/>version.go.md</u>")
+    Cfg("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Config layering<br/>config.go.md</u>") --> Compute
+    CLI("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>CLI wiring<br/>main.go.md</u>") --> Compute
+    Compute --> Text("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>text output<br/>LAST_TAG / VERSION / TAG")
+    Compute --> Fmt("<img src='barnacle:braces.svg' width='20' alt=''/><br/>shell and json formats")
+    CLI --> Release("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>release pipeline<br/>scripts/release.sh.md</u>")
     click Compute href "version.go.md"
     click Cfg href "config.go.md"
     click CLI href "main.go.md"
     click Release href "scripts/release.sh.md"
+    class Compute,Cfg,CLI goFile
+    class Release shFile
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
 ```
 
 `versioner` computes a version number from git history.

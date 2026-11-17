@@ -2,13 +2,15 @@
 
 ```mermaid
 flowchart TD
-    Args["os.Args minus argv[0]"] --> Parse["flag.NewFlagSet<br/>ContinueOnError"]
-    Parse --> Layer["layered config resolution<br/>defaults, file, env, flags"]
-    Layer --> Compute[Compute<br/>version.go.md]
-    Compute --> Out["writeOutput<br/>text / shell / json"]
-    Out --> Exit["exitCode(err)<br/>0 ok, 1 compute, 2 usage"]
+    Args("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>os.Args minus argv[0]") --> Parse("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>flag.NewFlagSet<br/>ContinueOnError")
+    Parse --> Layer("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>layered config resolution<br/>defaults, file, env, flags</u>")
+    Layer --> Compute("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Compute<br/>version.go.md</u>")
+    Compute --> Out("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>writeOutput<br/>text / shell / json")
+    Out --> Exit("<img src='barnacle:log-out.svg' width='20' alt=''/><br/>exitCode(err)<br/>0 ok, 1 compute, 2 usage")
     click Layer href "config.go.md"
     click Compute href "version.go.md"
+    class Parse,Layer,Compute goFile
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
 `main.go` is the `versioner` command: it parses flags, layers
