@@ -1,5 +1,14 @@
 # AGENTS.md
 
+```mermaid
+flowchart LR
+    Edit[Edit source] --> Doc[Update sibling .md<br/>in the same change]
+    Doc -->|<a href="scripts/docs.sh.md">regenerate site</a>| Regen[scripts/docs.sh<br/>source to site]
+    Regen --> Site[./site — git-ignored]
+    Site --> Commit[Commit source and doc together]
+    click Regen href "scripts/docs.sh.md"
+```
+
 Instructions for AI coding agents working in this repo.
 
 ## What this is
@@ -140,15 +149,16 @@ committed.
 Layout — documentation lives next to the code it describes:
 
 - One sibling `.md` per Go source file at the repo root: `main.go` →
-  `main.md`, `config.go` → `config.md`, `version.go` → `version.md`
-  (test files have no pages), plus `scripts/format.sh` → `scripts/format.md`.
-- One sibling `.md` per script: `scripts/build.sh` → `build.md`,
-  `scripts/docs.sh` → `docs.md`, `scripts/entry.sh` → `entry.md`,
-  `scripts/env.sh` → `env.md`, `scripts/release.sh` → `release.md`,
-  `scripts/version.sh` → `version.md`, plus `scripts/README.md` as the
+  `main.go.md`, `config.go` → `config.go.md`, `version.go` → `version.go.md`
+  (test files have no pages), plus `scripts/format.sh` →
+  `scripts/format.sh.md`.
+- One sibling `.md` per script: `scripts/build.sh` → `build.sh.md`,
+  `scripts/docs.sh` → `docs.sh.md`, `scripts/entry.sh` → `entry.sh.md`,
+  `scripts/env.sh` → `env.sh.md`, `scripts/release.sh` → `release.sh.md`,
+  `scripts/version.sh` → `version.sh.md`, plus `scripts/README.md` as the
   hub.
 - One sibling `.md` per bundle in `tools/` (`tools/<name>/update.sh` →
-  `tools/<name>/update.md`: `barnacle`, `formattington-lite`,
+  `tools/<name>/update.sh.md`: `barnacle`, `formattington-lite`,
   `logamuffin`, `runner-spawner`), plus `tools/update.sh` →
   `tools/update.md` for the shared implementation, plus `tools/README.md`
   as the hub.
@@ -160,33 +170,66 @@ Layout — documentation lives next to the code it describes:
   act as entry points; `ci/`, `Makefile`, `go.mod`, `.versioner.json`,
   `pyproject.toml`, and the lock files have no sibling pages.
 
+Naming rules:
+
+- **Retain the documented file's suffix.** A documentation file for
+  `main.go` is `main.go.md`; for `scripts/docs.sh` it is `docs.sh.md`.
+  This is the convention for everything in this repository, and it exists
+  so files that share a base name can be documented individually.
+- Free-standing diagrams that do not document one specific file
+  (for example `architecture.mmd`) may use a plain name.
+- Hub pages (`README.md` in each documented directory) keep their plain
+  names.
+
 Rules for keeping these files current:
 
 - When you add, rename, remove, or repurpose a documented file — a Go
   file, a script, or a bundle — update its sibling `.md` **in the same
   change**. A new file without its page is incomplete work; a stale page
   is worse than none.
+- **Every page opens with a Mermaid diagram** under its `#` heading
+  (guidance, not a hard rule): what the thing is and how it fits, in the
+  diagram type that fits best. If a page you touch has no diagram at the
+  top, add one. The diagram answers "what am I looking at, and where does
+  it fit?" for a newcomer — it is a map of the page's territory, not a
+  restatement of the heading. Two or three nodes of substance beat
+  decoration.
 - Source every fact: the `.go`/`.sh`/`.bash` file itself, this file
   (AGENTS.md), and README.md are the accepted sources. Never invent
   flags, exit codes, extensions, or bundle-platform matrices.
-- Use plain relative links (`cli.md`, `../README.md`) with the linking
-  file's `.md` path — barnacle rewrites them to `.html`. Do not link to
-  files barnacle does not render (binaries, `.sh`, `LICENSE`, and — in
-  this repo — anything under `tools/`); link the related `.md` page
+- Use plain relative links (`version.go.md`, `../README.md`) with the
+  linking file's `.md` path — barnacle rewrites them to `.html`. Do not
+  link to files barnacle does not render (binaries, `.sh`, `LICENSE`, and
+  — in this repo — anything under `tools/`); link the related `.md` page
   instead (for external references, a full `https://` URL is fine).
+- Prefer `click` directives in the top-of-page diagram (`click Scan href
+"scan.go.md"`) so diagram nodes navigate the generated site the same
+  way Markdown links do — barnacle rewrites `.md`/`.markdown`/`.mmd`
+  targets (with fragments preserved) to `.html`. Inline anchors in edge
+  labels (`Idle --> Waiting : <a href="scan.go.md">send(cmd)</a>`) make
+  transitions navigable too; flowchart labels with parentheses must be
+  double-quoted with single-quoted hrefs inside
+  (`A -->|"<a href='x.md'>send(cmd)</a>"| B`). Click targets are relative
+  to the current page, exactly like Markdown links.
 - A `foo.md` and a `foo.mmd` may not coexist for the same stem —
-  barnacle fails the whole site rather than overwriting.
+  barnacle fails the whole site rather than overwriting. The same applies
+  with retained suffixes: `foo.sh.md` and `foo.sh.mmd` both generate
+  `foo.sh.html`.
 - Hub pages (`README.md` in each documented directory) list their
-  siblings; adding a page means linking it from the hub too.
+  siblings; adding a page means linking it from the hub too, in the same
+  order as the rest of the directory's list.
 - Barnacle skips hidden files by default, so the `.common.env` and
-  `.<platform>.env` cascade is documented inside `scripts/env.md` —
+  `.<platform>.env` cascade is documented inside `scripts/env.sh.md` —
   keep it accurate there instead of adding hidden doc files.
 - Regenerate and self-review the site before publishing:
-  `scripts/docs.sh`, then click through the changed pages. The
-  generator output must remain free of broken local links.
+  `scripts/docs.sh`, then click through the changed pages. The generator
+  output must remain free of broken local links; barnacle prints a
+  non-fatal note listing pages with no Mermaid diagram — there should be
+  none.
 
 Definition of Done addition: a change that touches any documented file
-updates (or creates) its sibling page in the same commit.
+updates (or creates) its sibling page in the same commit — including the
+diagram at the top.
 
 ## Parity checking (shell vs Go)
 

@@ -1,8 +1,17 @@
 # The docs generator (`scripts/docs.sh`)
 
+```mermaid
+flowchart LR
+    Env["env.sh cascade<br/>BARNACLE_BIN"] --> Script["scripts/docs.sh"]
+    Script --> Barnacle["pinned barnacle<br/>tools/barnacle, not rendered"]
+    Barnacle --> Scan["scans .md/.mmd,<br/>rewrites doc links to .html"]
+    Scan --> Site["./site/<br/>static HTML, git-ignored"]
+    click Env href "env.sh.md"
+```
+
 Generates the documentation site you are reading: it runs the pinned
 barnacle binary (`tools/barnacle/update.sh` refreshes it; the bundle is
-documented in `tools/barnacle/update.md`) against this repository.
+documented in `tools/barnacle/update.sh.md`) against this repository.
 
 Barnacle scans the working tree for Markdown (`.md`) and Mermaid (`.mmd`)
 files, renders each as a page, and keeps relative links between them.
@@ -24,9 +33,9 @@ see `barnacle --help` for `--config`/`--site` semantics.
 ## How it locates barnacle
 
 The script resolves the repository root from its own path, requires
-[`scripts/entry.sh`](entry.md) to exist (fails with a printed error and
+[`scripts/entry.sh`](entry.sh.md) to exist (fails with a printed error and
 exit `1` otherwise), and sources it. `BARNACLE_BIN` comes from the
-[cascade](env.md) (`tools/barnacle/v<version>/<platform>/barnacle[.exe]`);
+[cascade](env.sh.md) (`tools/barnacle/v<version>/<platform>/barnacle[.exe]`);
 if unset or not executable, the script fails with instructions to run
 `tools/barnacle/update.sh` (or set `BARNACLE_BIN` explicitly). It then
 runs barnacle with the repository root as cwd, so barnacle's
@@ -45,11 +54,11 @@ Every `.md`/`.mmd` in the tree that is not excluded — see the
 excluded by barnacle; hidden files and directories (the cascade's
 `.common.env` et al.) are skipped unless `.barnacle.json` sets
 `includeHidden` — none of the hidden cascade is rendered, so
-[env.md](env.md) documents it.
+[env.sh.md](env.sh.md) documents it.
 
 ## Related pages
 
-- [entry.md](entry.md) · [env.md](env.md)
+- [entry.sh.md](entry.sh.md) · [env.sh.md](env.sh.md)
 - The barnacle bundle and its refresher are documented in
-  `tools/barnacle/update.md` (source page; `tools/` is excluded from the
+  `tools/barnacle/update.sh.md` (source page; `tools/` is excluded from the
   barnacle scan, so it is not rendered).

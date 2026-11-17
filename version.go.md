@@ -1,7 +1,20 @@
 # Version computation (`version.go`)
 
+```mermaid
+flowchart TD
+    Cfg["Config (see config.go.md)"] --> Tag{"git describe --tags --match"}
+    Tag -- "tag found" --> Seed["seed major, minor, revision from tag;<br/>patch = rev-list tag --count"]
+    Tag -- "no tag" --> Base["base 0.0.0.0"]
+    Seed --> Branch["branch version: exempt map else default (254)"]
+    Base --> Branch
+    Branch --> Replay["replay commits after tag (or all), oldest first;<br/>every commit bumps patch"]
+    Replay --> Result["Result: LastTag, Version, Trace<br/>rendered by main.go.md"]
+    click Cfg href "config.go.md"
+    click Result href "main.go.md"
+```
+
 `version.go` holds the pure version rules and the git plumbing behind
-them. Given a `Config` (see [config.md](config.md)), `Compute` derives
+them. Given a `Config` (see [config.go.md](config.go.md)), `Compute` derives
 `VERSION`/`TAG` from git history. The package doc mirrors the legacy
 `get_version.sh` semantics:
 
@@ -61,12 +74,12 @@ Built on them:
 
 ## Where it is used
 
-[main.md](main.md) — `run` calls `Compute` and renders the `Result`.
+[main.go.md](main.go.md) — `run` calls `Compute` and renders the `Result`.
 Unit tests live in `version_test.go` (stubbed via `gitRun`, `stubGit`
 helper) and `config_test.go`.
 
 ## Related pages
 
-- [config.md](config.md) — configuration inputs
-- [main.md](main.md) — CLI wiring and output formats
+- [config.go.md](config.go.md) — configuration inputs
+- [main.go.md](main.go.md) — CLI wiring and output formats
 - [README.md](README.md) — the version scheme as documented for users

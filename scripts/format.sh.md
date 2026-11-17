@@ -1,5 +1,15 @@
 # The format driver (`scripts/format.sh`)
 
+```mermaid
+flowchart LR
+    Local["./scripts/format.sh"] --> UV["uv run formattington<br/>--config .formattington.json"]
+    UV --> Run["prettier, gofmt + goimports,<br/>shfmt -i 2, taplo"]
+    Run --> Files["repository files<br/>formatted in place"]
+    CI["ci/format_check.sh<br/>check only, no writes"] --> Run
+    click Local href "README.md"
+    click CI href "../README.md"
+```
+
 `scripts/format.sh` formats this repository in place using
 [formattington](https://github.com/fordaj/formattington). It is the local
 counterpart to the CI formatting gate (`ci/format_check.sh`, which exits
@@ -47,4 +57,4 @@ generated locations.
 ## Related pages
 
 - [README.md](../README.md) — user-facing formatting/CI notes
-- [scripts/docs.md](docs.md) — the other self-hosted tooling driver
+- [scripts/docs.sh.md](docs.sh.md) — the other self-hosted tooling driver
